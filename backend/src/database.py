@@ -2,8 +2,13 @@ import os
 from models import User
 from sqlmodel import SQLModel, Session, create_engine, select
 import bcrypt
+import sys
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL == None:
+    sys.exit("No URL found in env file")
+
 engine = create_engine(DATABASE_URL, echo=True)
 
 
