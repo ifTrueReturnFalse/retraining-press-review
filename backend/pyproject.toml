@@ -14,7 +14,8 @@ dependencies = [
 ]
 
 [project.scripts]
-db = "scripts.scripts:start_db"
+start_db = "scripts.scripts:start_db"
+stop_db = "scripts.scripts:stop_db"
 api = "main:start"
 
 [dependency-groups]

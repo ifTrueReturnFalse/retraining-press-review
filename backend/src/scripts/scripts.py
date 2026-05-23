@@ -26,3 +26,14 @@ def start_db():
 
     result = subprocess.run(cmd)
     sys.exit(result.returncode)
+
+
+def stop_db():
+    cmd = [
+        "docker",
+        "stop",
+        "newsfoundry-db",
+    ]
+
+    result = subprocess.run(cmd)
+    sys.exit(result.returncode)
