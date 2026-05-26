@@ -1,13 +1,39 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Font family */
+  --font-title: var(--font-ibm-plex-sans), sans-serif;
+  --font-body: var(--font-inter), sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Body font size */
+  --text-2xs: 0.75rem;
+  --text-xs: 0.875rem;
+  --text-base: 1rem;
+  --text-m: 1.125rem;
+  --text-l: 1.5rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2rem;
+
+  /* Title font size */
+  --title-2xs: 0.875rem;
+  --title-xs: 1rem;
+  --title-base: 1.125rem;
+  --title-m: 1.5rem;
+  --title-l: 2rem;
+  --title-xl: 2.5rem;
+  --title-2xl: 3rem;
+  --title-3xl: 3.5rem;
+
+  /* Colors */
+  --slate-white: #FFFFFF;
+  --slate-100: #FBFBFC;
+  --slate-200: #F5F5F7;
+  --slate-300: #ECEEF2;
+  --slate-400: #E5E5EF;
+  --slate-500: #CACAD5;
+  --slate-600: #9999AB;
+  --slate-700: #838392;
+  --slate-800: #717182;
+  --slate-dark: #2A2A31;
+  --velvet: #803CDA;
 }
 
 html {
@@ -26,7 +52,7 @@ body {
   flex-direction: column;
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -40,10 +66,4 @@ body {
 a {
   color: inherit;
   text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
 }
