@@ -13,4 +13,4 @@ RUN uv sync --frozen
 
 EXPOSE 8000
 
-CMD ["uv", "run", "python", "src/main.py"]
+CMD ["uv", "run", "api"]
