@@ -1,0 +1,18 @@
+.loginForm {
+  width: 28rem;
+  height: 21rem;
+  background-color: var(--slate-white);
+  border: 1px solid var(--slate-300);
+  border-radius: 1rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--slate-800);
+  text-align: center;
+}

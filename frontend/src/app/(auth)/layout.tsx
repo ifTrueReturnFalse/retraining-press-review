@@ -1,7 +1,9 @@
+import styles from "./AuthLayout.module.css";
+
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <main>{children}</main>;
+  return <main className={styles.container}>{children}</main>;
 }

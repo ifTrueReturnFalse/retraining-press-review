@@ -32,7 +32,8 @@
   --slate-600: #9999AB;
   --slate-700: #838392;
   --slate-800: #717182;
-  --slate-dark: #2A2A31;
+  --slate-800-transparent: rgba(113, 113, 130, 0.1);
+  --slate-dark: #2a2a31;
   --velvet: #803CDA;
 }
 

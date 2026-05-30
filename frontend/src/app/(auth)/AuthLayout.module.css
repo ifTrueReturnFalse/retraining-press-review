@@ -1,0 +1,14 @@
+.container {
+  min-height: 100vh;
+  margin: 0;
+
+  background-color: var(--slate-dark);
+  background-image:
+    linear-gradient(to right, var(--slate-800-transparent) 4px, transparent 4px),
+    linear-gradient(to bottom, var(--slate-800-transparent) 4px, transparent 4px);
+  background-size: 100px 100px;
+  background-position: 50px 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
