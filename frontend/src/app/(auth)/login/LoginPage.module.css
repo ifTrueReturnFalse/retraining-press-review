@@ -16,3 +16,20 @@
   color: var(--slate-800);
   text-align: center;
 }
+
+.sliderWindow {
+  width: 100%;
+  overflow: hidden;
+}
+
+.slider {
+  display: flex;
+  flex-direction: row;
+  width: calc(200% + 2rem);
+  gap: 2rem;
+  transition: transform 0.3s ease-in-out;
+}
+
+.sliderChildren {
+  width: calc(50%);
+}
