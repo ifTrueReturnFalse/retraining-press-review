@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--text-2xs);
+}
+
+.container label {
+  color: var(--slate-dark);
+  font-size: var(--text-base);
+}
+
+.container input {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: .5rem;
+  background-color: var(--slate-300);
+  height: 2.25rem;
+  outline: none;
+  color: var(--slate-800);
+}
+
+.container input::placeholder {
+  color: var(--slate-800);
+}
+
+.container input:focus {
+  border: 1px solid var(--velvet);
+}
