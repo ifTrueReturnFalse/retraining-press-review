@@ -11,12 +11,15 @@ dependencies = [
     "psycopg2-binary>=2.9.9",
     "bcrypt>=4.3.0",
     "python-dotenv>=1.1.1",
+    "pydantic-settings>=2.14.1",
+    "email-validator>=2.3.0",
 ]
 
 [project.scripts]
 start_db = "scripts.scripts:start_db"
 stop_db = "scripts.scripts:stop_db"
 api = "main:start"
+init_db = "scripts.init_db:run"
 
 [dependency-groups]
 dev = [

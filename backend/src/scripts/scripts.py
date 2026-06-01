@@ -1,23 +1,20 @@
 import subprocess
 import sys
-import os
-from dotenv import load_dotenv
+from config import settings
 
 
 def start_db():
-    load_dotenv()
-
     cmd = [
         "docker",
         "run",
         "--name",
         "newsfoundry-db",
         "-e",
-        f"POSTGRES_USER={os.getenv('DATABASE_USER')}",
+        f"POSTGRES_USER={settings.DATABASE_USER}",
         "-e",
-        f"POSTGRES_PASSWORD={os.getenv('DATABASE_PASSWORD')}",
+        f"POSTGRES_PASSWORD={settings.DATABASE_PASSWORD}",
         "-e",
-        f"POSTGRES_DB={os.getenv('DATABASE')}",
+        f"POSTGRES_DB={settings.DATABASE}",
         "-p",
         "5432:5432",
         "-d",

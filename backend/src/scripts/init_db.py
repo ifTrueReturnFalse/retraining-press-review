@@ -1,0 +1,33 @@
+import bcrypt
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from config import settings
+from models.users import Base, UserModel
+from database import engine
+
+
+def run():
+    Base.metadata.create_all(engine)
+    print("Database initialized successfully")
+
+    with Session(engine) as session:
+        statement = select(UserModel).where(
+            UserModel.email == settings.FIRST_USER_EMAIL
+        )
+        user = session.scalars(statement).first()
+
+        if not user:
+            session.add(
+                UserModel(
+                    email=settings.FIRST_USER_EMAIL,
+                    hashed_password=bcrypt.hashpw(
+                        settings.FIRST_USER_PASSWORD.encode("utf-8"), bcrypt.gensalt()
+                    ),
+                )
+            )
+            session.commit()
+
+
+if __name__ == "__main__":
+    run()
