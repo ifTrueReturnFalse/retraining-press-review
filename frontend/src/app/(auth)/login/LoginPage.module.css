@@ -1,14 +1,15 @@
 .loginForm {
   width: 28rem;
-  height: 21rem;
+  min-height: 21rem;
   background-color: var(--slate-white);
   border: 1px solid var(--slate-300);
   border-radius: 1rem;
-  padding: 2rem;
+  padding: 3rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  gap: 1.5rem;
+  transition: height 0.3s ease-in-out;
 }
 
 .hint {
@@ -27,9 +28,63 @@
   flex-direction: row;
   width: calc(200% + 2rem);
   gap: 2rem;
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.25s ease-in-out;
 }
 
 .sliderChildren {
   width: calc(50%);
+}
+
+.errorWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease-out;
+  width: 100%;
+}
+
+.errorWrapper.errorVisible {
+  grid-template-rows: 1fr;
+}
+
+.error {
+  color: var(--velvet);
+  font-size: var(--text-base);
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  margin-top: 0;
+  transition: opacity ease-out 0.2s, margin 0.2s ease-out;
+}
+
+.errorWrapper.errorVisible .error {
+  opacity: 1;
+  margin-top: 0.75rem;
+}
+
+.buttonWrapper {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 0.2s ease-out,
+    margin 0.2s ease-out;
+  width: 100%;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.buttonWrapper.buttonHidden {
+  grid-template-rows: 0fr;
+  margin-top: 0;
+  height: 0;
+}
+
+.buttonContent {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.buttonWrapper.buttonHidden .buttonContent {
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
 }
