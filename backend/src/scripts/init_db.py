@@ -8,6 +8,11 @@ from database import engine
 
 
 def run():
+    """
+    Initializes the database by creating all tables defined in the models.
+    It also checks for the existence of a default user and creates one 
+    using credentials from the settings if it does not already exist.
+    """
     Base.metadata.create_all(engine)
     print("Database initialized successfully")
 
