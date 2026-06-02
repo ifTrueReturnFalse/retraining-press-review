@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
+import { loginAction } from "@/actions/auth";
 
 import TextInputWithLabel from "@/components/Inputs/TextInputWithLabel/TextInputWithLabel";
 import styles from "./LoginPage.module.css";
@@ -15,6 +18,8 @@ import classNames from "classnames";
 export default function LoginPage() {
   // Handle the state of the form (0: Email address, 1: Password)
   const [step, setStep] = useState(0);
+  const [globalError, setGlobalError] = useState<string | null>(null);
+  const router = useRouter();
 
   // React Hook Form
   const {
@@ -27,6 +32,7 @@ export default function LoginPage() {
     resolver: zodResolver(LoginSchema),
   });
 
+  // Make sure the focus happen after the animation
   useEffect(() => {
     // Using a timeout to keep animation working with the auto focus
     const timeoutId = setTimeout(() => {
@@ -59,8 +65,17 @@ export default function LoginPage() {
    * Final form submission handler.
    * @param data - The validated login credentials (email and password).
    */
-  const onSubmit = (data: LoginModel) => {
-    console.log("Données de connexion valides : ", data);
+  const onSubmit = async (data: LoginModel) => {
+    setGlobalError(null);
+
+    const result = await loginAction(data);
+
+    if (result.success) {
+      router.push("/app");
+    } else {
+      setGlobalError(result.error || "Une erreur est survenue");
+      setStep(0);
+    }
   };
 
   return (
@@ -126,11 +141,19 @@ export default function LoginPage() {
       </div>
 
       <BlackButton
-        buttonText="Se connecter"
+        buttonText={isSubmitting ? "Connexion..." : "Se connecter"}
         onClick={handleAction}
         disabled={isSubmitting}
         type="submit"
       />
+
+      <div
+        className={classNames(styles.errorWrapper, {
+          [styles.errorVisible]: globalError !== null,
+        })}
+      >
+        <p className={styles.error}>{globalError}</p>
+      </div>
     </form>
   );
 }
