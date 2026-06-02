@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     FIRST_USER_EMAIL: EmailStr = "test@test.com"
     FIRST_USER_PASSWORD: str = "password"
 
+    JWT_SECRET_KEY: str = "ultra_secret_key"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 240 # 4h
+
     model_config = SettingsConfigDict(
         env_file=BACKEND_DIR / ".env", env_file_encoding="utf-8"
     )
