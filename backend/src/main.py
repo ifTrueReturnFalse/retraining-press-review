@@ -2,12 +2,14 @@ from fastapi import FastAPI
 import uvicorn
 from routers import auth
 
+from schemas.response import ApiResponse
+
 app = FastAPI(title="NewsFoundry API")
 
 app.include_router(auth.router)
 
 
-@app.get("/")
+@app.get("/", response_model=ApiResponse[str])
 async def hello():
     """
     Root endpoint that returns a friendly greeting.
@@ -15,7 +17,10 @@ async def hello():
     Returns:
         dict: A dictionary containing a wave emoji message.
     """
-    return {"message": "👋"}
+    return ApiResponse(
+        success=True,
+        message="👋"
+    )
 
 
 def start():

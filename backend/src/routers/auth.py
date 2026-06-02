@@ -5,12 +5,14 @@ from sqlalchemy import select
 
 from database import engine
 from models.users import UserModel
+from schemas.response import ApiResponse
+from schemas.auth import AuthResponse
 from utils.security import verify_password, create_access_token
 
 router = APIRouter(prefix="/auth", tags=["Authentification"])
 
 
-@router.post("/login")
+@router.post("/login", response_model=ApiResponse[AuthResponse])
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Authenticates a user and returns a JWT access token.
@@ -37,7 +39,11 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
         token = create_access_token(data={"sub": user.email})
 
-        return {
+        payload = {
             "access_token": token,
             "token_type": "bearer",
         }
+
+        return ApiResponse(
+            success=True, message="Utilisateur connecté avec succès", data=payload
+        )

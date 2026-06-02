@@ -73,7 +73,7 @@ export default function LoginPage() {
     if (result.success) {
       router.push("/app");
     } else {
-      setGlobalError(result.error || "Une erreur est survenue");
+      setGlobalError(result.message || "Une erreur est survenue");
       setStep(0);
     }
   };
