@@ -1,0 +1,30 @@
+.gridContainer {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 5fr;
+  grid-template-rows: 5.5em 1fr 2em 6em;
+  grid-template-areas:
+    "head-left head-right"
+    "mid-left mid-right"
+    "low-left mid-right"
+    "low-left low-right";
+}
+
+.hLeft {
+  grid-area: head-left;
+}
+.hRight {
+  grid-area: head-right;
+}
+.mLeft {
+  grid-area: mid-left;
+}
+.mRight {
+  grid-area: mid-right;
+}
+.lLeft {
+  grid-area: low-left;
+}
+.lRight {
+  grid-area: low-right;
+}
