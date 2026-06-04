@@ -27,6 +27,7 @@ export default function LoginPage() {
     handleSubmit,
     trigger,
     setFocus,
+    resetField,
     formState: { errors, isSubmitting },
   } = useForm<LoginModel>({
     resolver: zodResolver(LoginSchema),
@@ -74,6 +75,7 @@ export default function LoginPage() {
       router.push("/app");
     } else {
       setGlobalError(result.message || "Une erreur est survenue");
+      resetField("password");
       setStep(0);
     }
   };
