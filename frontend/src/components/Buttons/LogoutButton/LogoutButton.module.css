@@ -1,0 +1,13 @@
+.button {
+  background-color: transparent;
+  outline: none;
+  display: flex;
+  flex-direction: row;
+  gap: 0.7rem;
+  align-items: center;
+  border: none;
+  font-size: var(--text-xs);
+  width: 100%;
+  min-height: 3rem;
+  cursor: pointer;
+}

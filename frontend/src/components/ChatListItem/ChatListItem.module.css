@@ -1,0 +1,16 @@
+.container {
+  border-bottom: 1px solid var(--slate-400);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.title {
+  font-size: var(--text-base);
+}
+
+.date {
+  font-size: var(--text-2xs);
+  color: var(--slate-800);
+}

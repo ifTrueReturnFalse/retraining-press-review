@@ -1,0 +1,43 @@
+.button {
+  
+  background-color: var(--slate-200);
+  color: var(--slate-dark);
+  outline: none;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-family: var(--inter);
+  cursor: pointer;
+  min-height: 2rem;
+  transition: all 0.3s ease-in-out;
+  font-size: var(--text-xs);
+}
+
+.button.selected {
+  background-color: var(--velvet);
+  color: var(--slate-white);
+}
+
+.button .stroke svg path {
+  transition: all 0.3s ease-in-out;
+  stroke: var(--slate-dark);
+}
+
+.button.selected .stroke svg path {
+  stroke: var(--slate-white);
+}
+
+.button .fill svg path {
+  transition: all 0.3s ease-in-out;
+  fill: var(--slate-dark);
+}
+
+.button.selected .fill svg path {
+  fill: var(--slate-white);
+}
