@@ -1,30 +1,65 @@
 .gridContainer {
   height: 100vh;
   display: grid;
-  grid-template-columns: 1fr 5fr;
+  grid-template-columns: 20em 1fr;
   grid-template-rows: 5.5em 1fr 2em 6em;
   grid-template-areas:
     "head-left head-right"
     "mid-left mid-right"
     "low-left mid-right"
     "low-left low-right";
+  background-color: var(--slate-100);
 }
 
 .hLeft {
   grid-area: head-left;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--slate-400);
 }
+
+.hLeft svg {
+  max-height: 1rem;
+}
+
 .hRight {
   grid-area: head-right;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 1.2rem;
+  border-left: 1px solid var(--slate-400);
+  border-bottom: 1px solid var(--slate-400);
 }
+
 .mLeft {
   grid-area: mid-left;
+  display: flex;
+  flex-direction: column;
 }
+
 .mRight {
   grid-area: mid-right;
+  background-color: var(--slate-400);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
+
 .lLeft {
   grid-area: low-left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 1.5rem;
 }
+
 .lRight {
   grid-area: low-right;
+  background-color: var(--slate-white);
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  padding: 1rem 4.5rem;
 }
