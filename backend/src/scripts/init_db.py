@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config import settings
-from models.users import Base, UserModel
+from models import Base, UserModel, ConversationModel
 from database import engine
 
 
