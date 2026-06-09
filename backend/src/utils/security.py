@@ -85,7 +85,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
         # Extract the 'sub' (subject) claim which contains the user's email
         email = payload.get("sub")
         if not email:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Vous n'êtes pas autorisé à accéder à ce contenu",
+            )
 
     except jwt.InvalidTokenError:
         # Raised if the token is expired, signature is invalid, etc.

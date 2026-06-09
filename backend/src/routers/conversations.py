@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database import engine
 from models.conversations import ConversationModel
@@ -36,5 +37,33 @@ def create_conversation(current_user: UserModel = Depends(get_current_user)):
         return ApiResponse(
             success=True,
             message="Conversation créée avec succès",
+            data=ConversationResponse.model_validate(conversation),
+        )
+
+
+@router.get("/{conversation_id}", response_model=ApiResponse[ConversationResponse])
+def get_conversation(
+    conversation_id: int, current_user: UserModel = Depends(get_current_user)
+):
+    with Session(engine) as session:
+        conversation = session.scalars(
+            select(ConversationModel).where(ConversationModel.id == conversation_id)
+        ).first()
+
+        if not conversation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cette conversation n'existe pas",
+            )
+
+        if conversation.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Vous n'êtes pas autorisé à accéder à ce contenu",
+            )
+
+        return ApiResponse(
+            success=True,
+            message="Conversation récupérée avec succès",
             data=ConversationResponse.model_validate(conversation),
         )
