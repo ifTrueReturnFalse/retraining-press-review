@@ -89,7 +89,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
 
     except jwt.InvalidTokenError:
         # Raised if the token is expired, signature is invalid, etc.
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise HTTPException(
+            detail="Vous n'êtes pas autorisé à accéder à ce contenu",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
 
     with Session(engine) as session:
         # Query the database to find the user associated with the email in the token
@@ -98,6 +101,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
         ).first()
 
         if not user:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED)
+            raise HTTPException(
+                detail="Vous n'êtes pas autorisé à accéder à ce contenu",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
 
         return user
