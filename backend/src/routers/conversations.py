@@ -45,7 +45,21 @@ def create_conversation(current_user: UserModel = Depends(get_current_user)):
 def get_conversation(
     conversation_id: int, current_user: UserModel = Depends(get_current_user)
 ):
+    """
+    Retrieves a specific conversation by its ID, ensuring it belongs to the current user.
+
+    Args:
+        conversation_id (int): The unique identifier of the conversation.
+        current_user (UserModel): The user object retrieved from the JWT token.
+
+    Returns:
+        ApiResponse[ConversationResponse]: The conversation data if found and authorized.
+
+    Raises:
+        HTTPException: 404 if not found, 403 if the user is not the owner.
+    """
     with Session(engine) as session:
+        # Fetch the conversation from the database using the ID
         conversation = session.scalars(
             select(ConversationModel).where(ConversationModel.id == conversation_id)
         ).first()
@@ -56,6 +70,7 @@ def get_conversation(
                 detail="Cette conversation n'existe pas",
             )
 
+        # Security check: Ensure the conversation belongs to the authenticated user
         if conversation.user_id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
