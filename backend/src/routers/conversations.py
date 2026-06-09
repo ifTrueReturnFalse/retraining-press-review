@@ -6,9 +6,9 @@ from models.conversations import ConversationModel
 from utils.security import get_current_user
 from models.users import UserModel
 from schemas.response import ApiResponse
-from schemas.conversations import ConversationResponse
+from schemas.conversations import ConversationResponse, ConversationSummary
 
-router = APIRouter(prefix="/conversations", tags=["Conversation", "Conversations"])
+router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
 
 @router.post("", response_model=ApiResponse[ConversationResponse])
@@ -38,6 +38,35 @@ def create_conversation(current_user: UserModel = Depends(get_current_user)):
             success=True,
             message="Conversation créée avec succès",
             data=ConversationResponse.model_validate(conversation),
+        )
+
+
+@router.get("", response_model=ApiResponse[list[ConversationSummary]])
+def get_all_conversations(current_user: UserModel = Depends(get_current_user)):
+    """
+    Retrieves the list of all conversations belonging to the authenticated user.
+
+    Args:
+        current_user (UserModel): The user object retrieved from the JWT token.
+
+    Returns:
+        ApiResponse[list[ConversationSummary]]: A list of conversation summaries.
+    """
+    with Session(engine) as session:
+        # Query all conversations where the user_id matches the current user's ID
+        conversations = session.scalars(
+            select(ConversationModel).where(
+                ConversationModel.user_id == current_user.id
+            )
+        ).all()
+
+        return ApiResponse(
+            success=True,
+            message="Conversations récupérées avec succès",
+            data=[
+                ConversationSummary.model_validate(conversation)
+                for conversation in conversations
+            ],
         )
 
 
