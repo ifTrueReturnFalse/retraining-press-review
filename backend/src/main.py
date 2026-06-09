@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 import uvicorn
 from routers import auth, conversations
 
@@ -19,6 +20,44 @@ async def hello():
         dict: A dictionary containing a wave emoji message.
     """
     return ApiResponse(success=True, message="👋")
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exception: HTTPException):
+    """
+    Global handler for FastAPI HTTPException.
+
+    Args:
+        request (Request): The incoming HTTP request.
+        exception (HTTPException): The raised HTTP exception.
+
+    Returns:
+        JSONResponse: A standardized error response using ApiResponse schema.
+    """
+    return JSONResponse(
+        status_code=exception.status_code,
+        content=ApiResponse(success=False, message=exception.detail).model_dump(),
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exception: Exception):
+    """
+    Catch-all handler for unhandled exceptions to prevent leaking internal details.
+
+    Args:
+        request (Request): The incoming HTTP request.
+        exception (Exception): The raw exception object.
+
+    Returns:
+        JSONResponse: A 500 Internal Server Error response.
+    """
+    return JSONResponse(
+        status_code=500,
+        content=ApiResponse(
+            success=False, message="Une erreur interne est survenue"
+        ).model_dump(),
+    )
 
 
 def start():
