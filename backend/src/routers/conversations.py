@@ -6,7 +6,12 @@ from models.conversations import ConversationModel
 from utils.security import get_current_user
 from models.users import UserModel
 from schemas.response import ApiResponse
-from schemas.conversations import ConversationResponse, ConversationSummary
+from schemas.conversations import (
+    ConversationResponse,
+    ConversationSummary,
+    MessageRequest,
+)
+from services.ai_service import chat
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
@@ -109,5 +114,41 @@ def get_conversation(
         return ApiResponse(
             success=True,
             message="Conversation récupérée avec succès",
+            data=ConversationResponse.model_validate(conversation),
+        )
+
+
+@router.post(
+    "/{conversation_id}/messages", response_model=ApiResponse[ConversationResponse]
+)
+async def post_message(
+    conversation_id: int,
+    body: MessageRequest,
+    current_user: UserModel = Depends(get_current_user),
+):
+    with Session(engine) as session:
+        conversation = session.scalars(
+            select(ConversationModel).where(ConversationModel.id == conversation_id)
+        ).first()
+
+        if not conversation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Conversation introuvable"
+            )
+
+        if conversation.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Accès interdit",
+            )
+
+        response, new_history = await chat(body.message, conversation.history_json)
+        conversation.history_json = new_history
+        session.commit()
+        session.refresh(conversation)
+
+        return ApiResponse(
+            success=True,
+            message=response,
             data=ConversationResponse.model_validate(conversation),
         )
