@@ -6,7 +6,7 @@ export default function SendButton({
   ...props
 }: ComponentPropsWithoutRef<"button">) {
   return (
-    <button className={styles.button} {...props}>
+    <button className={styles.button} type="button" {...props}>
       <SendIcon />
     </button>
   );
