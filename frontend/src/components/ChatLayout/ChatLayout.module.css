@@ -45,6 +45,23 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.messageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  min-height: 100%;
+  padding: 2rem 6rem 0 6rem;
+}
+
+.messageContainer::after {
+  content: "";
+  min-height: 2rem;
+  flex-shrink: 0;
 }
 
 .lLeft {

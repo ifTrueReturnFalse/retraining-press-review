@@ -12,11 +12,12 @@ import ChatGreetings from "@/components/ChatGreetings/ChatGreetings";
 import ChatListItem from "@/components/ChatListItem/ChatListItem";
 import TextInputChat from "@/components/Inputs/TextInputChat/TextInputChat";
 import SendButton from "@/components/Buttons/SendButton/SendButton";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useChat } from "@/hooks/useChat";
 import { RawConversationResponse } from "@/models/chatModel";
 import { parseHistory } from "@/utils/parseHistory";
 import { clientFetch } from "@/services/clientApi";
+import ChatMessage from "../ChatMessage/ChatMessage";
 
 export default function ChatLayout({
   conversationId,
@@ -26,6 +27,7 @@ export default function ChatLayout({
   const [chatInput, setChatInput] = useState("");
   const { messages, setMessages, sendMessage, isLoading } =
     useChat(conversationId);
+  const messageEndRef = useRef<HTMLDivElement>(null);
 
   const handleConversation = async () => {
     setChatInput("");
@@ -51,6 +53,13 @@ export default function ChatLayout({
 
     loadHistory();
   }, [conversationId]);
+
+  useEffect(() => {
+    setTimeout(
+      () => messageEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+      300,
+    );
+  }, [messages]);
 
   return (
     <div className={styles.gridContainer}>
@@ -85,13 +94,12 @@ export default function ChatLayout({
       <main className={styles.mRight}>
         {!conversationId && <ChatGreetings />}
         {conversationId && (
-          <>
+          <div className={styles.messageContainer}>
             {messages.map((message, index) => (
-              <p key={index}>
-                {message.role} : {message.content}
-              </p>
+              <ChatMessage key={index} message={message} />
             ))}
-          </>
+            <div ref={messageEndRef} />
+          </div>
         )}
       </main>
 
