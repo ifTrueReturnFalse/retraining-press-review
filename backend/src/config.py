@@ -6,6 +6,8 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
+    APP_ENV: str = "production"
+    
     DATABASE_URL: str
     DATABASE_USER: str
     DATABASE_PASSWORD: str

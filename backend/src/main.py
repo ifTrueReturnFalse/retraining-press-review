@@ -1,7 +1,9 @@
+import os
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 import uvicorn
 from routers import auth, conversations
+from config import settings
 
 from schemas.response import ApiResponse
 
@@ -65,4 +67,8 @@ def start():
     Starts the FastAPI application using the Uvicorn ASGI server.
     Configured to listen on all interfaces (0.0.0.0) at port 8000.
     """
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    dev_mode = settings.APP_ENV == "development"
+
+    uvicorn.run(
+        "main:app" if dev_mode else app, host="0.0.0.0", port=8000, reload=dev_mode
+    )
