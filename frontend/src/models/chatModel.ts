@@ -1,6 +1,8 @@
 import {
   Conversation,
   ConversationResponse,
+  ConversationSummary,
+  GetAllConversationsResponse,
   MessageSchema,
   RawConversationResponse,
 } from "@/schemas/chatSchema";
@@ -10,3 +12,7 @@ export type Message = z.infer<typeof MessageSchema>;
 export type Conversation = z.infer<typeof Conversation>;
 export type ConversationResponse = z.infer<typeof ConversationResponse>;
 export type RawConversationResponse = z.infer<typeof RawConversationResponse>;
+export type ConversationSummary = z.infer<typeof ConversationSummary>;
+export type GetAllConversationsResponse = z.infer<
+  typeof GetAllConversationsResponse
+>;

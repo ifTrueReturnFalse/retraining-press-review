@@ -21,5 +21,13 @@ export const RawConversation = z.object({
   created_at: z.date(),
 });
 
+export const ConversationSummary = Conversation.pick({
+  id: true,
+  created_at: true,
+});
+
 export const ConversationResponse = createApiResponseSchema(Conversation);
 export const RawConversationResponse = createApiResponseSchema(RawConversation);
+export const GetAllConversationsResponse = createApiResponseSchema(
+  z.array(ConversationSummary),
+);

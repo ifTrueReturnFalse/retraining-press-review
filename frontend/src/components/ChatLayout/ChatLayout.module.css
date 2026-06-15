@@ -35,7 +35,8 @@
 .mLeft {
   grid-area: mid-left;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
+  overflow-y: auto;
 }
 
 .mRight {

@@ -13,11 +13,8 @@ import ChatListItem from "@/components/ChatListItem/ChatListItem";
 import TextInputChat from "@/components/Inputs/TextInputChat/TextInputChat";
 import SendButton from "@/components/Buttons/SendButton/SendButton";
 import { useState, useEffect, useRef } from "react";
-import { useChat } from "@/hooks/useChat";
-import { RawConversationResponse } from "@/models/chatModel";
-import { parseHistory } from "@/utils/parseHistory";
-import { clientFetch } from "@/services/clientApi";
 import ChatMessage from "../ChatMessage/ChatMessage";
+import { useChatManager } from "@/hooks/useChatManager";
 
 export default function ChatLayout({
   conversationId,
@@ -25,34 +22,24 @@ export default function ChatLayout({
   conversationId?: number;
 }) {
   const [chatInput, setChatInput] = useState("");
-  const { messages, setMessages, sendMessage, isLoading } =
-    useChat(conversationId);
+  const {
+    messages,
+    conversations,
+    sendMessage,
+    isLoading,
+    selectConversation,
+    currentConversationId,
+  } = useChatManager(conversationId);
   const messageEndRef = useRef<HTMLDivElement>(null);
 
   const handleConversation = async () => {
-    setChatInput("");
-    sendMessage(chatInput);
+    try {
+      setChatInput("");
+      sendMessage(chatInput);
+    } catch (error) {
+      console.error(error);
+    }
   };
-
-  useEffect(() => {
-    if (!conversationId) return;
-    if (messages.length > 0) return;
-
-    const loadHistory = async () => {
-      const data = await clientFetch<RawConversationResponse>(
-        `/chat/${conversationId}`,
-        {
-          method: "GET",
-        },
-      );
-
-      if (!data.data) return;
-
-      setMessages(parseHistory(data.data?.history_json));
-    };
-
-    loadHistory();
-  }, [conversationId]);
 
   useEffect(() => {
     setTimeout(
@@ -86,14 +73,18 @@ export default function ChatLayout({
       {/* Mid row */}
 
       <aside className={styles.mLeft}>
-        <ChatListItem date={new Date()} />
-        <ChatListItem date={new Date()} />
-        <ChatListItem date={new Date()} />
+        {conversations.map((conversation, index) => (
+          <ChatListItem
+            key={index}
+            conversation={conversation}
+            onClick={() => selectConversation(conversation.id)}
+          />
+        ))}
       </aside>
 
       <main className={styles.mRight}>
-        {!conversationId && <ChatGreetings />}
-        {conversationId && (
+        {!currentConversationId && <ChatGreetings />}
+        {currentConversationId && (
           <div className={styles.messageContainer}>
             {messages.map((message, index) => (
               <ChatMessage key={index} message={message} />
