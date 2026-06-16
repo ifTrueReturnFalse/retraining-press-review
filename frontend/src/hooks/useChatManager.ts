@@ -62,7 +62,6 @@ export function useChatManager(initialConversationId?: number) {
         if (!data.success) throw new Error(data.message);
 
         convId = data.data.id;
-        router.replace(`/?conversation=${convId}`);
         setCurrentConversationId(convId);
       }
 

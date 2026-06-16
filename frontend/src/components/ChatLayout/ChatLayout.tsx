@@ -107,7 +107,11 @@ export default function ChatLayout({
           onSubmit={handleConversation}
           disabled={isLoading}
         />
-        <SendButton onClick={handleConversation} type="button" />
+        <SendButton
+          onClick={handleConversation}
+          type="button"
+          disabled={isLoading}
+        />
       </div>
     </div>
   );
