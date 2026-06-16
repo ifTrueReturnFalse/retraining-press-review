@@ -36,6 +36,7 @@
   grid-area: mid-left;
   display: flex;
   flex-direction: column-reverse;
+  justify-content: start;
   overflow-y: auto;
 }
 
