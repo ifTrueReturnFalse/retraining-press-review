@@ -5,9 +5,13 @@ import {
   sendMessageAction,
 } from "@/actions/chat";
 import { ConversationSummary, Message } from "@/models/chatModel";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+/**
+ * Custom hook to manage chat state, including conversation history,
+ * message sending, and conversation selection.
+ * @param initialConversationId Optional ID to load a specific conversation on mount.
+ */
 export function useChatManager(initialConversationId?: number) {
   const [currentConversationId, setCurrentConversationId] = useState<
     number | undefined
@@ -15,13 +19,18 @@ export function useChatManager(initialConversationId?: number) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
-  const router = useRouter();
 
+  /**
+   * Fetches the list of all available conversation summaries.
+   */
   const fetchConversations = async () => {
     const result = await getConversationsAction();
     if (result.success) setConversations(result.data ?? []);
   };
 
+  /**
+   * Loads messages for a specific conversation ID.
+   */
   const loadConversation = async (conversationId: number) => {
     try {
       setIsLoading(true);
@@ -38,15 +47,37 @@ export function useChatManager(initialConversationId?: number) {
     }
   };
 
+  /**
+   * Switches the active conversation and clears the current message view.
+   */
   const selectConversation = async (conversationId: number) => {
     setMessages([]);
     await loadConversation(conversationId);
   };
 
+  /**
+   * Triggers the creation of a new conversation on the server.
+   */
+  const createConversation = async () => {
+    const data = await createConversationAction();
+    if (!data.success) throw new Error(data.message);
+    if (!data.data)
+      throw new Error("Le serveur n'a pas renvoyé de conversation");
+
+    fetchConversations();
+
+    return data.data.id;
+  };
+
+  /**
+   * Sends a message to the current conversation.
+   * If no conversation exists, it creates one first.
+   */
   const sendMessage = async (content: string) => {
     try {
       setIsLoading(true);
 
+      // Optimistically add the user message to the UI
       const userMessage: Message = {
         role: "user",
         content,
@@ -56,15 +87,13 @@ export function useChatManager(initialConversationId?: number) {
 
       let convId = currentConversationId;
 
+      // If this is the first message of a new chat, create the conversation record
       if (!convId) {
-        const data = await createConversationAction();
-
-        if (!data.success) throw new Error(data.message);
-
-        convId = data.data.id;
+        convId = await createConversation();
         setCurrentConversationId(convId);
       }
 
+      // Request the AI response from the server
       const result = await sendMessageAction(convId, content);
       if (!result.success || !result.data) throw new Error(result.message);
 
@@ -82,6 +111,9 @@ export function useChatManager(initialConversationId?: number) {
     }
   };
 
+  /**
+   * Initial setup to fetch the sidebar list and load the active chat if provided.
+   */
   const initializeManager = async () => {
     await fetchConversations();
 
