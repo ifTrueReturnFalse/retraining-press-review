@@ -3,14 +3,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config import settings
-from models import Base, UserModel, ConversationModel
+from models import Base, UserModel, ConversationModel, TopNewsCache
 from database import engine
 
 
 def run():
     """
     Initializes the database by creating all tables defined in the models.
-    It also checks for the existence of a default user and creates one 
+    It also checks for the existence of a default user and creates one
     using credentials from the settings if it does not already exist.
     """
     Base.metadata.create_all(engine)

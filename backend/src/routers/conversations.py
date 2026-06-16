@@ -12,6 +12,7 @@ from schemas.conversations import (
     MessageRequest,
 )
 from services.ai_service import chat
+from services.news_service import get_top_news_for_prompt
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
@@ -126,6 +127,20 @@ async def post_message(
     body: MessageRequest,
     current_user: UserModel = Depends(get_current_user),
 ):
+    """
+    Sends a message to the AI assistant within a specific conversation.
+
+    Args:
+        conversation_id (int): The ID of the conversation to continue.
+        body (MessageRequest): The user's message content.
+        current_user (UserModel): The authenticated user.
+
+    Returns:
+        ApiResponse[ConversationResponse]: The updated conversation with the AI's response.
+
+    Raises:
+        HTTPException: 404 if conversation doesn't exist, 403 if user is not the owner.
+    """
     with Session(engine) as session:
         conversation = session.scalars(
             select(ConversationModel).where(ConversationModel.id == conversation_id)
@@ -142,7 +157,12 @@ async def post_message(
                 detail="Accès interdit",
             )
 
-        response, new_history = await chat(body.message, conversation.history_json)
+        # Fetch fresh news context and process the chat through the AI service
+        response, new_history = await chat(
+            body.message, conversation.history_json, await get_top_news_for_prompt()
+        )
+
+        # Update the conversation history in the database with the new serialized JSON
         conversation.history_json = new_history
         session.commit()
         session.refresh(conversation)

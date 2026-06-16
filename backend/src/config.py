@@ -7,7 +7,7 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 class Settings(BaseSettings):
     APP_ENV: str = "production"
-    
+
     DATABASE_URL: str
     DATABASE_USER: str
     DATABASE_PASSWORD: str
@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 240  # 4h
 
     MISTRAL_API_KEY: str
+    WORLD_NEWS_API_KEY: str
 
     model_config = SettingsConfigDict(
         env_file=BACKEND_DIR / ".env", env_file_encoding="utf-8"
