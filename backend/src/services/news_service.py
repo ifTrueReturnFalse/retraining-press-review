@@ -1,13 +1,16 @@
 import httpx
 from config import settings
-from schemas.news import TopNewsResponse
+from schemas.news import TopNewsResponse, FullArticleResponse
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database import engine
 from models.top_news import TopNewsCache
+from models.conversations import ConversationModel
 from datetime import datetime, timedelta, timezone
 from fastapi import status, HTTPException
+from typing import List
+import json
 
 
 async def fetch_top_news() -> str:
@@ -28,7 +31,7 @@ async def fetch_top_news() -> str:
         response = await client.get(
             "https://api.worldnewsapi.com/top-news", params=params
         )
-        
+
         try:
             validated_response = TopNewsResponse.model_validate(response.json())
         except ValidationError as error:
@@ -84,3 +87,66 @@ async def get_top_news_for_prompt() -> str:
         session.refresh(new_cache)
 
         return news
+
+
+async def search_news(
+    query: str, source_country: str, language: str
+) -> FullArticleResponse:
+    """
+    Searches for news articles based on specific keywords and filters.
+
+    @param {str} query - The search keywords or text.
+    @param {str} source_country - ISO 3166 country code.
+    @param {str} language - ISO 6391 language code.
+    @returns {FullArticleResponse} A validated object containing a list of articles and metadata.
+    @throws {HTTPException} If the API response does not match the expected schema.
+    """
+    async with httpx.AsyncClient() as client:
+        # Define search parameters for the World News API
+        params = {
+            "text": query,
+            "source-country": source_country,
+            "language": language,
+            "sort": "publish-time",
+            "sort-direction": "DESC",
+            "api-key": settings.WORLD_NEWS_API_KEY,
+        }
+
+        response = await client.get(
+            "https://api.worldnewsapi.com/search-news", params=params
+        )
+
+        try:
+            validated_response = FullArticleResponse.model_validate(response.json())
+        except ValidationError as error:
+            print(error)
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Mauvais format de réponse",
+            )
+
+        return validated_response
+
+
+def store_article_urls(urls: List[str], conversation_id: int):
+    """
+    Persists a list of article URLs into the conversation's metadata for future context.
+
+    @param {List[str]} urls - List of URLs to store.
+    @param {int} conversation_id - The ID of the conversation to update.
+    """
+    with Session(engine) as session:
+        # Fetch the specific conversation from the database
+        conversation = session.scalars(
+            select(ConversationModel).where(ConversationModel.id == conversation_id)
+        ).first()
+
+        if not conversation:
+            return
+
+        # Deserialize existing URLs, append new ones, and re-serialize to JSON
+        # This maintains a persistent list of all articles "seen" in this chat session
+        existing = json.loads(conversation.loaded_articles or "[]")
+        existing.extend(urls)
+        conversation.loaded_articles = json.dumps(existing)
+        session.commit()

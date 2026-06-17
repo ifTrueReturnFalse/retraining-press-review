@@ -3,12 +3,21 @@ from pydantic_ai.models.mistral import MistralModel
 from pydantic_ai.providers.mistral import MistralProvider
 from pydantic_ai.messages import ModelMessagesTypeAdapter
 from config import settings
+from dataclasses import dataclass
+from services.news_service import search_news, store_article_urls
+
+
+@dataclass
+class AgentDeps:
+    system_prompt: str
+    conversation_id: int
+
 
 model = MistralModel(
     "mistral-small-latest", provider=MistralProvider(api_key=settings.MISTRAL_API_KEY)
 )
 
-agent = Agent(model, deps_type=str)
+agent = Agent(model, deps_type=AgentDeps)
 
 
 @agent.system_prompt
@@ -22,7 +31,7 @@ async def base_prompt():
 
 
 @agent.system_prompt
-async def build_system_prompt(ctx: RunContext[str]):
+async def build_system_prompt(ctx: RunContext[AgentDeps]):
     """
     Injects dynamic context (news) into the system prompt.
 
@@ -30,24 +39,39 @@ async def build_system_prompt(ctx: RunContext[str]):
     @returns {str} The formatted prompt with current news.
     """
     # ctx.deps contains the top news fetched from the news_service
-    return f"Voici les actualistés du jour :\n{ctx.deps}"
+    return f"Voici les actualistés du jour :\n{ctx.deps.system_prompt}"
 
 
-@agent.tool_plain
-async def fetch_news(query: str) -> str:
+@agent.tool
+async def fetch_news(
+    ctx: RunContext[AgentDeps], query: str, language: str = "fr", country: str = "fr"
+) -> str:
     """
-    Fetches the latest news based on a search query.
+    Search for specific news articles based on a query and store their URLs for context.
 
-    @param {str} query - The search terms to look for in news articles.
-    @returns {str} A string containing news data or a placeholder.
+    @param {RunContext[AgentDeps]} ctx - The execution context containing dependencies.
+    @param {str} query - The search keywords.
+    @param {str} language - The language code, ISO 6391 language code (default 'fr').
+    @param {str} country - The country code, ISO 3166 country code (default 'fr').
+    @returns {str} A formatted string of titles and summaries.
     """
-    # This tool is registered as a 'plain' tool, meaning it doesn't require
-    # the RunContext to be passed as an argument.
-    return f"Nothing to see here yet ! But here is a candy 🍬"
+
+    conversation_id = ctx.deps.conversation_id
+    # Call the external news API service
+    result = await search_news(query, country, language)
+
+    # Extract URLs to persist them in the conversation's metadata
+    url_list = [news.url for news in result.news if news.url]
+
+    # Inline: Update the database with the newly discovered article URLs
+    store_article_urls(url_list, conversation_id)
+
+    # Format the results for the LLM to process
+    return "\n".join(f"- {news.title}: {news.summary}" for news in result.news)
 
 
 async def chat(
-    user_message: str, history_json: str, system_prompt: str
+    user_message: str, history_json: str, system_prompt: str, conversation_id: int
 ) -> tuple[str, str]:
     """
     Processes a user message within a specific conversation context using the AI agent.
@@ -63,7 +87,11 @@ async def chat(
     history = ModelMessagesTypeAdapter.validate_json(history_json)
 
     # Run the agent with the current message and the loaded history
-    result = await agent.run(user_message, message_history=history, deps=system_prompt)
+    result = await agent.run(
+        user_message,
+        message_history=history,
+        deps=AgentDeps(system_prompt, conversation_id),
+    )
 
     # result.all_messages() contains the full conversation including the new exchange.
     # We serialize it back to JSON to persist it in the database.

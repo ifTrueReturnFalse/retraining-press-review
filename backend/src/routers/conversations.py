@@ -159,7 +159,10 @@ async def post_message(
 
         # Fetch fresh news context and process the chat through the AI service
         response, new_history = await chat(
-            body.message, conversation.history_json, await get_top_news_for_prompt()
+            body.message,
+            conversation.history_json,
+            await get_top_news_for_prompt(),
+            conversation_id,
         )
 
         # Update the conversation history in the database with the new serialized JSON
