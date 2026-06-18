@@ -55,6 +55,15 @@ export function useChatManager(initialConversationId?: number) {
     await loadConversation(conversationId);
   };
 
+
+  /**
+   * Reset the UI and messages.
+   */
+  const newChat = () => {
+    setMessages([]);
+    setCurrentConversationId(undefined);
+  };
+
   /**
    * Triggers the creation of a new conversation on the server.
    */
@@ -140,5 +149,6 @@ export function useChatManager(initialConversationId?: number) {
     conversations,
     selectConversation,
     sendMessage,
+    newChat,
   };
 }

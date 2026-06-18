@@ -1,0 +1,18 @@
+.button {
+  color: black;
+  font-family: var(--font-title);
+  font-size: var(--title-base);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+  height: 2.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.button:hover {
+  background-color: var(--slate-300);
+}

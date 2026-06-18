@@ -15,6 +15,8 @@ import SendButton from "@/components/Buttons/SendButton/SendButton";
 import { useState, useEffect, useRef } from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatManager } from "@/hooks/useChatManager";
+import NewConversationButton from "../Buttons/NewConversationButton/NewConversationButton";
+import classNames from "classnames";
 
 export default function ChatLayout({
   conversationId,
@@ -29,6 +31,7 @@ export default function ChatLayout({
     isLoading,
     selectConversation,
     currentConversationId,
+    newChat,
   } = useChatManager(conversationId);
   const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -56,18 +59,31 @@ export default function ChatLayout({
       </div>
 
       <header className={styles.hRight}>
-        <IconButton
-          icon={<ChatIcon />}
-          label="Chat"
-          isSelected={true}
-          coloringMethod={IconColoringMethod.Stroke}
-        />
-        <IconButton
-          icon={<DocIcon />}
-          label="Revue de presse"
-          isSelected={false}
-          coloringMethod={IconColoringMethod.Fill}
-        />
+        <div
+          className={classNames(styles.newConversationWrapper, {
+            [styles.hidden]: currentConversationId === undefined,
+          })}
+        >
+          <NewConversationButton onClick={() => newChat()} />
+        </div>
+        <div className={styles.controlButtonContainer}>
+          <IconButton
+            icon={<ChatIcon />}
+            label="Chat"
+            isSelected={true}
+            coloringMethod={IconColoringMethod.Stroke}
+          />
+          <IconButton
+            icon={<DocIcon />}
+            label="Revue de presse"
+            isSelected={false}
+            disabled={!currentConversationId}
+            coloringMethod={IconColoringMethod.Fill}
+          />
+        </div>
+        <div>
+          <p>future button</p>
+        </div>
       </header>
 
       {/* Mid row */}
