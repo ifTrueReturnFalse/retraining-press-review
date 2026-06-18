@@ -7,6 +7,8 @@ import {
 import { ConversationSummary, Message } from "@/models/chatModel";
 import { useEffect, useState } from "react";
 
+export type chatModeType = "chat" | "review";
+
 /**
  * Custom hook to manage chat state, including conversation history,
  * message sending, and conversation selection.
@@ -19,6 +21,7 @@ export function useChatManager(initialConversationId?: number) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [chatMode, setChatMode] = useState<chatModeType>("chat");
 
   /**
    * Fetches the list of all available conversation summaries.
@@ -52,9 +55,9 @@ export function useChatManager(initialConversationId?: number) {
    */
   const selectConversation = async (conversationId: number) => {
     setMessages([]);
+    setMode("chat");
     await loadConversation(conversationId);
   };
-
 
   /**
    * Reset the UI and messages.
@@ -62,6 +65,7 @@ export function useChatManager(initialConversationId?: number) {
   const newChat = () => {
     setMessages([]);
     setCurrentConversationId(undefined);
+    setMode("chat");
   };
 
   /**
@@ -120,6 +124,11 @@ export function useChatManager(initialConversationId?: number) {
     }
   };
 
+  const setMode = (mode: chatModeType) => {
+    if (mode === chatMode) return;
+    setChatMode(mode);
+  };
+
   /**
    * Initial setup to fetch the sidebar list and load the active chat if provided.
    */
@@ -150,5 +159,7 @@ export function useChatManager(initialConversationId?: number) {
     selectConversation,
     sendMessage,
     newChat,
+    chatMode,
+    setMode,
   };
 }

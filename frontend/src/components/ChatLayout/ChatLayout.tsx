@@ -14,7 +14,7 @@ import TextInputChat from "@/components/Inputs/TextInputChat/TextInputChat";
 import SendButton from "@/components/Buttons/SendButton/SendButton";
 import { useState, useEffect, useRef } from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
-import { useChatManager } from "@/hooks/useChatManager";
+import { useChatManager, chatModeType } from "@/hooks/useChatManager";
 import NewConversationButton from "../Buttons/NewConversationButton/NewConversationButton";
 import classNames from "classnames";
 import GenerateReviewButton from "../Buttons/GenerateReviewButton/GenerateReviewButton";
@@ -33,6 +33,8 @@ export default function ChatLayout({
     selectConversation,
     currentConversationId,
     newChat,
+    chatMode,
+    setMode,
   } = useChatManager(conversationId);
   const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +44,17 @@ export default function ChatLayout({
       sendMessage(chatInput);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleChatMode = (mode: chatModeType) => {
+    if (mode === chatMode) return;
+    setMode(mode);
+    if (mode === "chat") {
+      setTimeout(
+        () => messageEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+        300,
+      );
     }
   };
 
@@ -75,14 +88,16 @@ export default function ChatLayout({
           <IconButton
             icon={<ChatIcon />}
             label="Chat"
-            isSelected={true}
+            isSelected={chatMode === "chat"}
+            onClick={() => handleChatMode("chat")}
             coloringMethod={IconColoringMethod.Stroke}
           />
           <IconButton
             icon={<DocIcon />}
             label="Revue de presse"
-            isSelected={false}
+            isSelected={chatMode === "review"}
             disabled={!currentConversationId}
+            onClick={() => handleChatMode("review")}
             coloringMethod={IconColoringMethod.Fill}
           />
         </div>
@@ -109,7 +124,7 @@ export default function ChatLayout({
 
       <main className={styles.mRight}>
         {!currentConversationId && <ChatGreetings />}
-        {currentConversationId && (
+        {currentConversationId && chatMode === "chat" && (
           <div className={styles.messageContainer}>
             {messages.map((message, index) => (
               <ChatMessage key={index} message={message} />
@@ -117,6 +132,7 @@ export default function ChatLayout({
             <div ref={messageEndRef} />
           </div>
         )}
+        {currentConversationId && chatMode === "review" && <p>Coucou</p>}
       </main>
 
       {/* Bottom row */}
