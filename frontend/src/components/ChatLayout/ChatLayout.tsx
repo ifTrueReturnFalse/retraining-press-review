@@ -17,6 +17,7 @@ import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatManager } from "@/hooks/useChatManager";
 import NewConversationButton from "../Buttons/NewConversationButton/NewConversationButton";
 import classNames from "classnames";
+import GenerateReviewButton from "../Buttons/GenerateReviewButton/GenerateReviewButton";
 
 export default function ChatLayout({
   conversationId,
@@ -60,9 +61,13 @@ export default function ChatLayout({
 
       <header className={styles.hRight}>
         <div
-          className={classNames(styles.newConversationWrapper, {
-            [styles.hidden]: currentConversationId === undefined,
-          })}
+          className={classNames(
+            styles.buttonWrapper,
+            styles.newConversationWrapper,
+            {
+              [styles.hidden]: currentConversationId === undefined,
+            },
+          )}
         >
           <NewConversationButton onClick={() => newChat()} />
         </div>
@@ -81,8 +86,12 @@ export default function ChatLayout({
             coloringMethod={IconColoringMethod.Fill}
           />
         </div>
-        <div>
-          <p>future button</p>
+        <div
+          className={classNames(styles.buttonWrapper, {
+            [styles.hidden]: currentConversationId === undefined,
+          })}
+        >
+          <GenerateReviewButton />
         </div>
       </header>
 

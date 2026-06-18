@@ -32,11 +32,22 @@
   border-bottom: 1px solid var(--slate-400);
 }
 
-.newConversationWrapper {
+.buttonWrapper {
   display: grid;
   grid-template-columns: 1fr;
   opacity: 1;
   overflow: hidden;
+  transition:
+    grid-template-columns 0.6s ease-out,
+    opacity 0.5s ease-in;
+}
+
+.buttonWrapper.hidden {
+  grid-template-columns: 0fr;
+  opacity: 0;
+}
+
+.newConversationWrapper {
   margin-right: 5rem;
   transition:
     grid-template-columns 0.6s ease-out,
@@ -45,8 +56,6 @@
 }
 
 .newConversationWrapper.hidden {
-  grid-template-columns: 0fr;
-  opacity: 0;
   margin-right: 0;
 }
 
