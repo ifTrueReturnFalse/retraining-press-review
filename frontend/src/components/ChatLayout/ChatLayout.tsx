@@ -19,6 +19,8 @@ import NewConversationButton from "../Buttons/NewConversationButton/NewConversat
 import classNames from "classnames";
 import GenerateReviewButton from "../Buttons/GenerateReviewButton/GenerateReviewButton";
 import PressReview from "../PressReview/PressReview";
+import TextInputWithLabel from "../Inputs/TextInputWithLabel/TextInputWithLabel";
+import BlackButton from "../Buttons/BlackButton/BlackButton";
 
 export default function ChatLayout({
   conversationId,
@@ -36,8 +38,13 @@ export default function ChatLayout({
     newChat,
     chatMode,
     setMode,
+    isModalOpen,
+    setIsModalOpen,
+    reviewTheme,
+    setReviewTheme,
   } = useChatManager(conversationId);
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   const handleConversation = async () => {
     try {
@@ -66,8 +73,45 @@ export default function ChatLayout({
     );
   }, [messages]);
 
+  useEffect(() => {
+    if (isModalOpen) {
+      dialogRef.current?.showModal();
+    } else {
+      dialogRef.current?.close();
+    }
+    setReviewTheme("");
+  }, [isModalOpen]);
+
   return (
     <div className={styles.gridContainer}>
+      <dialog
+        ref={dialogRef}
+        className={styles.modal}
+        onClose={() => setIsModalOpen(false)}
+      >
+        <button
+          type="button"
+          onClick={() => dialogRef.current?.close()}
+          className={styles.modalCloseButton}
+        >
+          Fermer
+        </button>
+
+        <div className={styles.modalGreet}>
+          <h2>Générer une revue de presse</h2>
+          <p>Donner un thème à votre revue de presse</p>
+        </div>
+
+        <div className={styles.modalActions}>
+          <TextInputWithLabel
+            labelText="Thème de la revue de presse"
+            value={reviewTheme}
+            onChange={(e) => setReviewTheme(e.target.value)}
+          />
+          <BlackButton buttonText="Générer" />
+        </div>
+      </dialog>
+
       {/* Up row */}
       <div className={styles.hLeft}>
         <LogoIcon />
@@ -107,7 +151,7 @@ export default function ChatLayout({
             [styles.hidden]: currentConversationId === undefined,
           })}
         >
-          <GenerateReviewButton />
+          <GenerateReviewButton onClick={() => setIsModalOpen(true)} />
         </div>
       </header>
 
@@ -140,7 +184,11 @@ export default function ChatLayout({
               Consultez et gérez vos revues de presse générées par l&apos;IA
             </p>
             <div className={styles.reviewSubContainer}>
-              <PressReview newsType="Sports" content="**Titre**  Du texte  " generatedAt="2026-06-23T20:09:49+00:00" />
+              <PressReview
+                newsType="Sports"
+                content="**Titre**  Du texte  "
+                generatedAt="2026-06-23T20:09:49+00:00"
+              />
             </div>
           </div>
         )}

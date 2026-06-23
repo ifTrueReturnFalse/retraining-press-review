@@ -22,6 +22,8 @@ export function useChatManager(initialConversationId?: number) {
   const [isLoading, setIsLoading] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [chatMode, setChatMode] = useState<chatModeType>("chat");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reviewTheme, setReviewTheme] = useState("");
 
   /**
    * Fetches the list of all available conversation summaries.
@@ -161,5 +163,9 @@ export function useChatManager(initialConversationId?: number) {
     newChat,
     chatMode,
     setMode,
+    isModalOpen,
+    setIsModalOpen,
+    reviewTheme,
+    setReviewTheme,
   };
 }
