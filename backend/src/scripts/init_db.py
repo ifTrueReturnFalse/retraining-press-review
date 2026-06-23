@@ -13,9 +13,6 @@ def run():
     It also checks for the existence of a default user and creates one
     using credentials from the settings if it does not already exist.
     """
-    Base.metadata.create_all(engine)
-    print("Database initialized successfully")
-
     with Session(engine) as session:
         statement = select(UserModel).where(
             UserModel.email == settings.FIRST_USER_EMAIL
