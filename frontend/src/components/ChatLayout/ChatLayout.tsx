@@ -18,6 +18,7 @@ import { useChatManager, chatModeType } from "@/hooks/useChatManager";
 import NewConversationButton from "../Buttons/NewConversationButton/NewConversationButton";
 import classNames from "classnames";
 import GenerateReviewButton from "../Buttons/GenerateReviewButton/GenerateReviewButton";
+import PressReview from "../PressReview/PressReview";
 
 export default function ChatLayout({
   conversationId,
@@ -132,7 +133,17 @@ export default function ChatLayout({
             <div ref={messageEndRef} />
           </div>
         )}
-        {currentConversationId && chatMode === "review" && <p>Coucou</p>}
+        {currentConversationId && chatMode === "review" && (
+          <div className={styles.reviewMainContainer}>
+            <h1 className={styles.reviewTitle}>Revues de Presse</h1>
+            <p className={styles.reviewHint}>
+              Consultez et gérez vos revues de presse générées par l&apos;IA
+            </p>
+            <div className={styles.reviewSubContainer}>
+              <PressReview newsType="Sports" content="**Titre**  Du texte  " generatedAt="2026-06-23T20:09:49+00:00" />
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Bottom row */}

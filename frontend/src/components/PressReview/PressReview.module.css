@@ -1,0 +1,39 @@
+.review {
+  width: 100%;
+  background-color: var(--slate-white);
+  padding: 2.5rem;
+  border-radius: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.reviewHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.reviewDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reviewType {
+  font-family: var(--font-title);
+  font-size: var(--title-xs);
+  text-transform: uppercase;
+}
+
+.reviewDate {
+  color: var(--slate-800);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.copyButton {
+  width: fit-content;
+}

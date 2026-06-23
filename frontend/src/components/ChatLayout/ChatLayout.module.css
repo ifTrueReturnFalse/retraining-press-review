@@ -99,6 +99,25 @@
   flex-shrink: 0;
 }
 
+.reviewMainContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 2.5rem 5.6rem;
+}
+
+.reviewTitle {
+  font-size: var(--title-m);
+  color: var(--slate-dark);
+}
+
+.reviewHint {
+  font-size: var(--text-base);
+  color: var(--slate-800);
+  margin-bottom: 0.6rem;
+}
+
 .lLeft {
   grid-area: low-left;
   display: flex;
