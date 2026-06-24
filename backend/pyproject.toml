@@ -17,6 +17,10 @@ dependencies = [
     "pyjwt>=2.13.0",
     "pydantic-ai>=1.106.0",
     "alembic>=1.18.4",
+    "trafilatura>=2.1.0",
+    "llama-index-core>=0.14.23",
+    "llama-index-embeddings-mistralai>=0.5.1",
+    "llama-index-llms-mistralai>=0.10.2",
 ]
 
 [project.scripts]

@@ -5,14 +5,17 @@ from database import engine
 from models.conversations import ConversationModel
 from utils.security import get_current_user
 from models.users import UserModel
+from models.press_review import PressReviewModel
 from schemas.response import ApiResponse
 from schemas.conversations import (
     ConversationResponse,
     ConversationSummary,
     MessageRequest,
 )
+from schemas.press_review import PressReviewRequest, PressReviewResponse
 from services.ai_service import chat
 from services.news_service import get_top_news_for_prompt
+from services.press_review_service import get_urls_for_review, build_index
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
@@ -174,4 +177,89 @@ async def post_message(
             success=True,
             message=response,
             data=ConversationResponse.model_validate(conversation),
+        )
+
+
+@router.post(
+    "/{conversation_id}/press-review", response_model=ApiResponse[PressReviewResponse]
+)
+async def create_press_review(
+    conversation_id: int,
+    body: PressReviewRequest,
+    current_user: UserModel = Depends(get_current_user),
+):
+    """
+    Generates a press review based on a given theme within a specific conversation.
+
+    This endpoint fetches relevant news articles, builds an index from their content,
+    and then uses an LLM to generate a synthetic press review. The generated review
+    is stored in the database and associated with the conversation.
+
+    Args:
+        conversation_id (int): The ID of the conversation for which to generate the press review.
+        body (PressReviewRequest): The request body containing the theme for the press review.
+        current_user (UserModel): The authenticated user, obtained via dependency injection.
+
+    Returns:
+        ApiResponse[PressReviewResponse]: A standardized API response containing
+                                          the details of the newly created press review.
+
+    Raises:
+        HTTPException:
+            - 404_NOT_FOUND: If the `conversation_id` does not correspond to an existing conversation.
+            - 403_FORBIDDEN: If the authenticated user is not the owner of the conversation.
+            - 404_NOT_FOUND: If no articles are found for the specified theme (raised by `get_urls_for_review`).
+            - 417_EXPECTATION_FAILED: If the Language Model (LLM) fails to generate any content
+                                      for the press review.
+    """
+    with Session(engine) as session:
+        conversation = session.scalars(
+            select(ConversationModel).where(ConversationModel.id == conversation_id)
+        ).first()
+
+        if not conversation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Conversation introuvable"
+            )
+
+        if conversation.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Accès interdit",
+            )
+
+        # Fetch URLs of relevant articles based on the conversation's context and the requested theme.
+        urls = await get_urls_for_review(conversation, body.theme)
+        # Build a LlamaIndex VectorStoreIndex from the scraped article content.
+        index = await build_index(urls)
+
+        # Initialize a query engine from the index and query the LLM for the press review content.
+        query_engine = index.as_query_engine()
+        response = query_engine.query(
+            # LLM prompt instructing it to act as a press review editor.
+            f"Tu es un rédacteur de revue de presse\
+                                      Ton objectif est de rédiger une revue sur ce thème: {body.theme}\
+                                        Soit synthétique, conserve l'essentiel de l'information, cite tes sources"
+        )
+
+        content = str(response)
+
+        if not content:
+            raise HTTPException(
+                status_code=status.HTTP_417_EXPECTATION_FAILED,
+                detail="Aucune réponse du LLM",
+            )
+
+        press_review = PressReviewModel(
+            conversation_id=conversation_id, theme=body.theme, content=content
+        )
+
+        session.add(press_review)
+        session.commit()
+        session.refresh(press_review)
+
+        return ApiResponse(
+            success=True,
+            message="Revue de presse généré avec succès",
+            data=PressReviewResponse.model_validate(press_review),
         )

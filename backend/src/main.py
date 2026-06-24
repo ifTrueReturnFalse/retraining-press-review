@@ -4,10 +4,18 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from routers import auth, conversations
 from config import settings
-
+from services.press_review_service import init_llama_index
 from schemas.response import ApiResponse
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="NewsFoundry API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_llama_index()
+    yield
+
+
+app = FastAPI(title="NewsFoundry API", lifespan=lifespan)
 
 app.include_router(auth.router)
 app.include_router(conversations.router)
