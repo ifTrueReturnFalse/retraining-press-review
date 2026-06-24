@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config import settings
-from models import Base, UserModel, ConversationModel, TopNewsCache
+from models import UserModel
 from database import engine
 
 
