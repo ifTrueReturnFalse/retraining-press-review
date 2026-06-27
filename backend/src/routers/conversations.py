@@ -16,6 +16,7 @@ from schemas.press_review import PressReviewRequest, PressReviewResponse
 from services.ai_service import chat
 from services.news_service import get_top_news_for_prompt
 from services.press_review_service import get_urls_for_review, build_index
+from utils.conversations import get_owned_conversation_or_40X
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
@@ -98,22 +99,9 @@ def get_conversation(
     """
     with Session(engine) as session:
         # Fetch the conversation from the database using the ID
-        conversation = session.scalars(
-            select(ConversationModel).where(ConversationModel.id == conversation_id)
-        ).first()
-
-        if not conversation:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Cette conversation n'existe pas",
-            )
-
-        # Security check: Ensure the conversation belongs to the authenticated user
-        if conversation.user_id != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Vous n'êtes pas autorisé à accéder à ce contenu",
-            )
+        conversation = get_owned_conversation_or_40X(
+            session, conversation_id, current_user
+        )
 
         return ApiResponse(
             success=True,
@@ -145,20 +133,9 @@ async def post_message(
         HTTPException: 404 if conversation doesn't exist, 403 if user is not the owner.
     """
     with Session(engine) as session:
-        conversation = session.scalars(
-            select(ConversationModel).where(ConversationModel.id == conversation_id)
-        ).first()
-
-        if not conversation:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Conversation introuvable"
-            )
-
-        if conversation.user_id != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Accès interdit",
-            )
+        conversation = get_owned_conversation_or_40X(
+            session, conversation_id, current_user
+        )
 
         # Fetch fresh news context and process the chat through the AI service
         response, new_history = await chat(
@@ -213,20 +190,9 @@ async def create_press_review(
                                       for the press review.
     """
     with Session(engine) as session:
-        conversation = session.scalars(
-            select(ConversationModel).where(ConversationModel.id == conversation_id)
-        ).first()
-
-        if not conversation:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Conversation introuvable"
-            )
-
-        if conversation.user_id != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Accès interdit",
-            )
+        conversation = get_owned_conversation_or_40X(
+            session, conversation_id, current_user
+        )
 
         # Fetch URLs of relevant articles based on the conversation's context and the requested theme.
         urls = await get_urls_for_review(conversation, body.theme)
