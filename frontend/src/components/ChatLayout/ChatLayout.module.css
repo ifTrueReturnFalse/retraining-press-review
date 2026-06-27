@@ -163,6 +163,12 @@
   padding: 2.5rem 5.6rem;
 }
 
+.reviewMainContainer::after {
+  content: "";
+  min-height: 2rem;
+  flex-shrink: 0;
+}
+
 .reviewTitle {
   font-size: var(--title-m);
   color: var(--slate-dark);

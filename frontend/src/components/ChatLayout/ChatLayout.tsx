@@ -47,7 +47,9 @@ export default function ChatLayout({
     generatePressReview,
   } = useChatManager(conversationId);
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const reviewsEndRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const appRef = useRef<HTMLDivElement>(null);
 
   const handleConversation = async () => {
     try {
@@ -58,12 +60,22 @@ export default function ChatLayout({
     }
   };
 
+  /**
+   * Handles the change of chat mode (chat or review).
+   * If the mode is different from the current one, it updates the mode and scrolls to the appropriate section.
+   * @param {chatModeType} mode - The new chat mode to set.
+   */
   const handleChatMode = (mode: chatModeType) => {
     if (mode === chatMode) return;
     setMode(mode);
     if (mode === "chat") {
       setTimeout(
         () => messageEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+        300,
+      );
+    } else if (mode === "review") {
+      setTimeout(
+        () => reviewsEndRef.current?.scrollIntoView({ behavior: "smooth" }),
         300,
       );
     }
@@ -77,6 +89,13 @@ export default function ChatLayout({
   }, [messages]);
 
   useEffect(() => {
+    setTimeout(
+      () => reviewsEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+      300,
+    );
+  }, [pressReviews]);
+
+  useEffect(() => {
     if (isModalOpen) {
       dialogRef.current?.showModal();
     } else {
@@ -84,6 +103,13 @@ export default function ChatLayout({
     }
     setReviewTheme("");
   }, [isModalOpen]);
+
+  useEffect(() => {
+    const container = appRef.current;
+    if (!container) return;
+
+    container.scrollTop = 0;
+  }, [chatMode]);
 
   return (
     <div className={styles.gridContainer}>
@@ -115,8 +141,6 @@ export default function ChatLayout({
             buttonText="Générer"
             onClick={async () => {
               await generatePressReview(reviewTheme);
-              setReviewTheme("");
-              setIsModalOpen(false);
             }}
             disabled={isPressReviewLoading || !reviewTheme.trim()}
           />
@@ -180,7 +204,7 @@ export default function ChatLayout({
           ))}
       </aside>
 
-      <main className={styles.mRight}>
+      <main className={styles.mRight} ref={appRef}>
         {!currentConversationId && <ChatGreetings />}
         {currentConversationId && chatMode === "chat" && (
           <div className={styles.messageContainer}>
@@ -205,6 +229,7 @@ export default function ChatLayout({
                   newsType={pressReview.theme}
                 />
               ))}
+              <div ref={reviewsEndRef} />
             </div>
           </div>
         )}
