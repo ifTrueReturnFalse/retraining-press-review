@@ -42,6 +42,7 @@ export default function ChatLayout({
     setIsModalOpen,
     reviewTheme,
     setReviewTheme,
+    pressReviews,
   } = useChatManager(conversationId);
   const messageEndRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -184,11 +185,14 @@ export default function ChatLayout({
               Consultez et gérez vos revues de presse générées par l&apos;IA
             </p>
             <div className={styles.reviewSubContainer}>
-              <PressReview
-                newsType="Sports"
-                content="**Titre**  Du texte  "
-                generatedAt="2026-06-23T20:09:49+00:00"
-              />
+              {pressReviews.map((pressReview) => (
+                <PressReview
+                  key={pressReview.id}
+                  content={pressReview.content}
+                  generatedAt={pressReview.created_at.toISOString()}
+                  newsType={pressReview.theme}
+                />
+              ))}
             </div>
           </div>
         )}

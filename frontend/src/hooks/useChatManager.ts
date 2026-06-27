@@ -4,7 +4,12 @@ import {
   createConversationAction,
   sendMessageAction,
 } from "@/actions/chat";
+import {
+  getPressReviewsAction,
+  generatePressReviewAction,
+} from "@/actions/pressReviews";
 import { ConversationSummary, Message } from "@/models/chatModel";
+import { PressReview } from "@/models/pressReviewModel";
 import { useEffect, useState } from "react";
 
 export type chatModeType = "chat" | "review";
@@ -18,12 +23,18 @@ export function useChatManager(initialConversationId?: number) {
   const [currentConversationId, setCurrentConversationId] = useState<
     number | undefined
   >(initialConversationId);
+  // Chat
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [chatMode, setChatMode] = useState<chatModeType>("chat");
+  // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reviewTheme, setReviewTheme] = useState("");
+  // Reviews
+  const [pressReviews, setPressReviews] = useState<PressReview[]>([]);
+  const [isPressReviewLoading, setIsPressReviewLoading] = useState(false);
+  const [pressReviewError, setPressReviewError] = useState("");
 
   /**
    * Fetches the list of all available conversation summaries.
@@ -33,17 +44,30 @@ export function useChatManager(initialConversationId?: number) {
     if (result.success) setConversations(result.data ?? []);
   };
 
+  const fetchPressReviews = async (conversationId: number) => {
+    const result = await getPressReviewsAction(conversationId);
+    if (result.success) {
+      setPressReviews(result.data ?? []);
+    } else {
+      console.error(result.message);
+    }
+  };
+
   /**
    * Loads messages for a specific conversation ID.
    */
   const loadConversation = async (conversationId: number) => {
     try {
       setIsLoading(true);
-      const result = await getConversationMessagesAction(conversationId);
 
-      if (result.success) {
+      const [messagesResult] = await Promise.all([
+        getConversationMessagesAction(conversationId),
+        fetchPressReviews(conversationId),
+      ]);
+
+      if (messagesResult.success) {
         setCurrentConversationId(conversationId);
-        setMessages(result.data ?? []);
+        setMessages(messagesResult.data ?? []);
       }
     } catch (error) {
       console.error(error);
@@ -126,6 +150,34 @@ export function useChatManager(initialConversationId?: number) {
     }
   };
 
+  const generatePressReview = async (theme: string) => {
+    if (!currentConversationId) return;
+
+    if (chatMode === "chat") setChatMode("review");
+
+    try {
+      setIsPressReviewLoading(true);
+      setPressReviewError("");
+
+      const result = await generatePressReviewAction(
+        currentConversationId,
+        theme,
+      );
+
+      if (!result.success) {
+        setPressReviewError(result.message);
+        return;
+      }
+
+      setPressReviews((prev) => [...prev, result.data]);
+    } catch (error) {
+      console.error(error);
+      setPressReviewError("Erreur lors de la génération de la revue de presse");
+    } finally {
+      setIsPressReviewLoading(false);
+    }
+  };
+
   const setMode = (mode: chatModeType) => {
     if (mode === chatMode) return;
     setChatMode(mode);
@@ -167,5 +219,9 @@ export function useChatManager(initialConversationId?: number) {
     setIsModalOpen,
     reviewTheme,
     setReviewTheme,
+    pressReviews,
+    generatePressReview,
+    isPressReviewLoading,
+    pressReviewError,
   };
 }
