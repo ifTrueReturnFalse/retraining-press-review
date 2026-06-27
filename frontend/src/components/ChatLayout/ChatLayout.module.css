@@ -124,7 +124,7 @@
 .mLeft {
   grid-area: mid-left;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   justify-content: start;
   overflow-y: auto;
 }

@@ -7,8 +7,10 @@ import {
   ConversationSummary,
   RawConversationResponse,
 } from "@/models/chatModel";
+import { GetAllConversationsResponseSchema } from "@/schemas/chatSchema";
 import { serverFetch } from "@/services/serverApi";
 import { parseHistory } from "@/utils/parseHistory";
+import { z } from "zod";
 
 /**
  * Server action to initialize a new chat conversation.
@@ -56,16 +58,30 @@ export async function getConversationsAction(): Promise<
 > {
   try {
     // Fetch the list of conversations from the backend
-    const data = await serverFetch<GetAllConversationsResponse>(
+    const rawData = await serverFetch<GetAllConversationsResponse>(
       "/conversations",
       { method: "GET" },
     );
 
-    // Check if the API returned a success status and valid data array
-    if (!data.success || !data.data)
-      return { success: false, message: data.message || "Aucune conversation" };
+    const parsedResponse = GetAllConversationsResponseSchema.safeParse(rawData);
 
-    return { success: true, data: data.data };
+    if (!parsedResponse.success) {
+      console.error(
+        "Erreur de validation de l'API",
+        z.treeifyError(parsedResponse.error),
+      );
+    }
+
+    const apiData = parsedResponse.data;
+
+    if (!apiData?.success || !apiData.data) {
+      return {
+        success: false,
+        message: apiData?.message || "Aucune conversation",
+      };
+    }
+
+    return { success: true, data: apiData.data };
   } catch (error) {
     console.error("Erreur chargement conversations : ", error);
     return {

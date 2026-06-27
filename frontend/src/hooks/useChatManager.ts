@@ -41,6 +41,7 @@ export function useChatManager(initialConversationId?: number) {
    */
   const fetchConversations = async () => {
     const result = await getConversationsAction();
+    console.log(result)
     if (result.success) setConversations(result.data ?? []);
   };
 

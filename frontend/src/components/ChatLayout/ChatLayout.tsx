@@ -159,13 +159,15 @@ export default function ChatLayout({
       {/* Mid row */}
 
       <aside className={styles.mLeft}>
-        {conversations.map((conversation, index) => (
-          <ChatListItem
-            key={index}
-            conversation={conversation}
-            onClick={() => selectConversation(conversation.id)}
-          />
-        ))}
+        {[...conversations]
+          .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+          .map((conversation) => (
+            <ChatListItem
+              key={conversation.id}
+              conversation={conversation}
+              onClick={() => selectConversation(conversation.id)}
+            />
+          ))}
       </aside>
 
       <main className={styles.mRight}>

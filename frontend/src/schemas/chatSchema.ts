@@ -4,21 +4,21 @@ import { createApiResponseSchema } from "./apiSchema";
 export const MessageSchema = z.object({
   role: z.string(),
   content: z.string(),
-  timestamp: z.date(),
+  timestamp: z.coerce.date(),
 });
 
 export const Conversation = z.object({
   id: z.int(),
   user_id: z.int(),
   history_json: z.array(MessageSchema),
-  created_at: z.date(),
+  created_at: z.coerce.date(),
 });
 
 export const RawConversation = z.object({
   id: z.int(),
   user_id: z.int(),
   history_json: z.string(),
-  created_at: z.date(),
+  created_at: z.coerce.date(),
 });
 
 export const ConversationSummary = Conversation.pick({
@@ -26,8 +26,9 @@ export const ConversationSummary = Conversation.pick({
   created_at: true,
 });
 
-export const ConversationResponse = createApiResponseSchema(Conversation);
-export const RawConversationResponse = createApiResponseSchema(RawConversation);
-export const GetAllConversationsResponse = createApiResponseSchema(
+export const ConversationResponseSchema = createApiResponseSchema(Conversation);
+export const RawConversationResponseSchema =
+  createApiResponseSchema(RawConversation);
+export const GetAllConversationsResponseSchema = createApiResponseSchema(
   z.array(ConversationSummary),
 );
