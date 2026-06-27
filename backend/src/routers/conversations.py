@@ -17,6 +17,7 @@ from services.ai_service import chat
 from services.news_service import get_top_news_for_prompt
 from services.press_review_service import get_urls_for_review, build_index
 from utils.conversations import get_owned_conversation_or_40X
+from typing import List
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
@@ -228,4 +229,26 @@ async def create_press_review(
             success=True,
             message="Revue de presse généré avec succès",
             data=PressReviewResponse.model_validate(press_review),
+        )
+
+
+@router.get(
+    "/{conversation_id}/press-review",
+    response_model=ApiResponse[List[PressReviewResponse]],
+)
+def get_press_reviews(
+    conversation_id: int, current_user: UserModel = Depends(get_current_user)
+):
+    with Session(engine) as session:
+        get_owned_conversation_or_40X(session, conversation_id, current_user)
+        reviews = session.scalars(
+            select(PressReviewModel)
+            .where(PressReviewModel.conversation_id == conversation_id)
+            .order_by(PressReviewModel.created_at)
+        ).all()
+
+        return ApiResponse(
+            success=True,
+            message="Revues récupérés avec succès",
+            data=[PressReviewResponse.model_validate(review) for review in reviews],
         )
