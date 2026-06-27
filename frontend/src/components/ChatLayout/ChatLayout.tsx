@@ -43,6 +43,8 @@ export default function ChatLayout({
     reviewTheme,
     setReviewTheme,
     pressReviews,
+    isPressReviewLoading,
+    generatePressReview,
   } = useChatManager(conversationId);
   const messageEndRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -109,7 +111,15 @@ export default function ChatLayout({
             value={reviewTheme}
             onChange={(e) => setReviewTheme(e.target.value)}
           />
-          <BlackButton buttonText="Générer" />
+          <BlackButton
+            buttonText="Générer"
+            onClick={async () => {
+              await generatePressReview(reviewTheme);
+              setReviewTheme("");
+              setIsModalOpen(false);
+            }}
+            disabled={isPressReviewLoading || !reviewTheme.trim()}
+          />
         </div>
       </dialog>
 
