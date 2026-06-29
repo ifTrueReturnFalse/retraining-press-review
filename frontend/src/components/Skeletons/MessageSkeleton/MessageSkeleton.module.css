@@ -1,0 +1,55 @@
+.messageSkeletonContainer {
+  width: 60rem;
+  display: flex;
+  gap: 0.7rem;
+}
+
+.messageSkeletonContainer.user {
+  flex-direction: row-reverse;
+  margin-left: auto;
+}
+
+.fakeUser {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 50%;
+}
+
+.messageSkeleton {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: var(--slate-300);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  gap: 1rem;
+}
+
+.messages {
+  width: 100%;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.message {
+  height: var(--text-base);
+}
+
+.message100 {
+  width: 100%;
+}
+.message75 {
+  width: 75%;
+}
+.message50 {
+  width: 50%;
+}
+
+.date {
+  width: 30%;
+  height: var(--text-xs);
+}

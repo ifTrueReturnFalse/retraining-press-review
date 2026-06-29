@@ -22,6 +22,7 @@ import PressReview from "../PressReview/PressReview";
 import TextInputWithLabel from "../Inputs/TextInputWithLabel/TextInputWithLabel";
 import BlackButton from "../Buttons/BlackButton/BlackButton";
 import ConversationSkeleton from "../Skeletons/ConversationSkeleton/ConversationSkeleton";
+import MessageSkeleton from "../Skeletons/MessageSkeleton/MessageSkeleton";
 
 export default function ChatLayout({
   conversationId,
@@ -196,12 +197,7 @@ export default function ChatLayout({
       {/* Mid row */}
 
       <aside className={styles.mLeft}>
-        {isConversationsLoading && (
-          <>
-            <ConversationSkeleton />
-            <ConversationSkeleton />
-          </>
-        )}
+        {isConversationsLoading && <ConversationSkeleton />}
 
         {[...conversations]
           .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
@@ -210,6 +206,7 @@ export default function ChatLayout({
               key={conversation.id}
               conversation={conversation}
               onClick={() => selectConversation(conversation.id)}
+              disabled={isMessagesLoading}
             />
           ))}
       </aside>
@@ -218,6 +215,12 @@ export default function ChatLayout({
         {!currentConversationId && <ChatGreetings />}
         {currentConversationId && chatMode === "chat" && (
           <div className={styles.messageContainer}>
+            {isMessagesLoading && (
+              <>
+                <MessageSkeleton messageSkeletonType="user" />
+                <MessageSkeleton messageSkeletonType="assistant" />
+              </>
+            )}
             {messages.map((message, index) => (
               <ChatMessage key={index} message={message} />
             ))}
