@@ -21,6 +21,7 @@ import GenerateReviewButton from "../Buttons/GenerateReviewButton/GenerateReview
 import PressReview from "../PressReview/PressReview";
 import TextInputWithLabel from "../Inputs/TextInputWithLabel/TextInputWithLabel";
 import BlackButton from "../Buttons/BlackButton/BlackButton";
+import ConversationSkeleton from "../Skeletons/ConversationSkeleton/ConversationSkeleton";
 
 export default function ChatLayout({
   conversationId,
@@ -32,7 +33,9 @@ export default function ChatLayout({
     messages,
     conversations,
     sendMessage,
-    isLoading,
+    isLLMResponding,
+    isMessagesLoading,
+    isConversationsLoading,
     selectConversation,
     currentConversationId,
     newChat,
@@ -193,6 +196,13 @@ export default function ChatLayout({
       {/* Mid row */}
 
       <aside className={styles.mLeft}>
+        {isConversationsLoading && (
+          <>
+            <ConversationSkeleton />
+            <ConversationSkeleton />
+          </>
+        )}
+
         {[...conversations]
           .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
           .map((conversation) => (
@@ -246,12 +256,16 @@ export default function ChatLayout({
           value={chatInput}
           onChange={setChatInput}
           onSubmit={handleConversation}
-          disabled={isLoading}
+          disabled={
+            isConversationsLoading || isMessagesLoading || isLLMResponding
+          }
         />
         <SendButton
           onClick={handleConversation}
           type="button"
-          disabled={isLoading}
+          disabled={
+            isConversationsLoading || isMessagesLoading || isLLMResponding
+          }
         />
       </div>
     </div>

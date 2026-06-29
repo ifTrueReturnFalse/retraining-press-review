@@ -25,7 +25,9 @@ export function useChatManager(initialConversationId?: number) {
   >(initialConversationId);
   // Chat
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isConversationsLoading, setIsConversationsLoading] = useState(false);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
+  const [isLLMResponding, setIsLLMResponding] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [chatMode, setChatMode] = useState<chatModeType>("chat");
   // Modal
@@ -40,9 +42,13 @@ export function useChatManager(initialConversationId?: number) {
    * Fetches the list of all available conversation summaries.
    */
   const fetchConversations = async (): Promise<void> => {
-    const result = await getConversationsAction();
-    console.log(result);
-    if (result.success) setConversations(result.data ?? []);
+    try {
+      setIsConversationsLoading(true);
+      const result = await getConversationsAction();
+      if (result.success) setConversations(result.data ?? []);
+    } finally {
+      setIsConversationsLoading(false);
+    }
   };
 
   /**
@@ -72,7 +78,7 @@ export function useChatManager(initialConversationId?: number) {
    */
   const loadConversation = async (conversationId: number) => {
     try {
-      setIsLoading(true);
+      setIsMessagesLoading(true);
 
       const [messagesResult] = await Promise.all([
         getConversationMessagesAction(conversationId),
@@ -86,7 +92,7 @@ export function useChatManager(initialConversationId?: number) {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsMessagesLoading(false);
     }
   };
 
@@ -147,7 +153,7 @@ export function useChatManager(initialConversationId?: number) {
    */
   const sendMessage = async (content: string) => {
     try {
-      setIsLoading(true);
+      setIsLLMResponding(true);
 
       // Optimistically add the user message to the UI
       const userMessage: Message = {
@@ -179,7 +185,7 @@ export function useChatManager(initialConversationId?: number) {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsLLMResponding(false);
     }
   };
 
@@ -273,10 +279,12 @@ export function useChatManager(initialConversationId?: number) {
   return {
     currentConversationId,
     messages,
-    isLoading,
+    isConversationsLoading,
     conversations,
     selectConversation,
+    isMessagesLoading,
     sendMessage,
+    isLLMResponding,
     newChat,
     chatMode,
     setMode,
