@@ -21,7 +21,7 @@ export default function PressReview({
       <div className={styles.reviewHeader}>
         <div className={styles.reviewDetails}>
           <p className={styles.reviewType}>
-            ACTUALITES {newsType} - SEMAINE {getWeekNumber(generatedAt)}
+            {newsType} - SEMAINE {getWeekNumber(generatedAt)}
           </p>
           <p className={styles.reviewDate}>
             <CalendarIcon />
