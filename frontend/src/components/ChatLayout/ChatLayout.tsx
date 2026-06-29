@@ -23,6 +23,7 @@ import TextInputWithLabel from "../Inputs/TextInputWithLabel/TextInputWithLabel"
 import BlackButton from "../Buttons/BlackButton/BlackButton";
 import ConversationSkeleton from "../Skeletons/ConversationSkeleton/ConversationSkeleton";
 import MessageSkeleton from "../Skeletons/MessageSkeleton/MessageSkeleton";
+import LottieLoader from "../Loaders/LottieLoader/LottieLoader";
 
 export default function ChatLayout({
   conversationId,
@@ -224,9 +225,16 @@ export default function ChatLayout({
             {messages.map((message, index) => (
               <ChatMessage key={index} message={message} />
             ))}
+            {isLLMResponding && (
+              <LottieLoader
+                src="/animations/loading.json"
+                style={{ height: "5rem", width: "5rem" }}
+              />
+            )}
             <div ref={messageEndRef} />
           </div>
         )}
+
         {currentConversationId && chatMode === "review" && (
           <div className={styles.reviewMainContainer}>
             <h1 className={styles.reviewTitle}>Revues de Presse</h1>
