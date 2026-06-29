@@ -47,3 +47,12 @@ export function getWeekNumber(stringDate: string) {
     ? dateToWeekNumber(date)
     : dateToWeekNumber(new Date());
 }
+
+/**
+ * Pauses the execution for a specified number of milliseconds.
+ *
+ * @param ms The number of milliseconds to sleep.
+ */
+export const sleep = async (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
