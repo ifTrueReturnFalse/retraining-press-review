@@ -18,6 +18,7 @@ from services.news_service import get_top_news_for_prompt
 from services.press_review_service import get_urls_for_review, build_index
 from utils.conversations import get_owned_conversation_or_40X
 from typing import List
+from exceptions import MistralAPIError
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
@@ -138,13 +139,22 @@ async def post_message(
             session, conversation_id, current_user
         )
 
-        # Fetch fresh news context and process the chat through the AI service
-        response, new_history = await chat(
-            body.message,
-            conversation.history_json,
-            await get_top_news_for_prompt(),
-            conversation_id,
-        )
+        top_news = await get_top_news_for_prompt()
+
+        try:
+            # Fetch fresh news context and process the chat through the AI service
+            response, new_history = await chat(
+                body.message,
+                conversation.history_json,
+                top_news,
+                conversation_id,
+            )
+        except MistralAPIError as error:
+            print(error)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Service de chat temporairement indisponible",
+            ) from error
 
         # Update the conversation history in the database with the new serialized JSON
         conversation.history_json = new_history
