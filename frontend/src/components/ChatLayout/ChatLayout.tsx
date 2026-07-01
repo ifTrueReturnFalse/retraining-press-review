@@ -24,6 +24,7 @@ import BlackButton from "../Buttons/BlackButton/BlackButton";
 import ConversationSkeleton from "../Skeletons/ConversationSkeleton/ConversationSkeleton";
 import MessageSkeleton from "../Skeletons/MessageSkeleton/MessageSkeleton";
 import LottieLoader from "../Loaders/LottieLoader/LottieLoader";
+import ReviewLoader from "../Loaders/ReviewLoader/ReviewLoader";
 
 export default function ChatLayout({
   conversationId,
@@ -250,6 +251,8 @@ export default function ChatLayout({
                   newsType={pressReview.theme}
                 />
               ))}
+
+              {isPressReviewLoading && <ReviewLoader />}
               <div ref={reviewsEndRef} />
             </div>
           </div>
@@ -268,14 +271,14 @@ export default function ChatLayout({
           onChange={setChatInput}
           onSubmit={handleConversation}
           disabled={
-            isConversationsLoading || isMessagesLoading || isLLMResponding
+            isConversationsLoading || isMessagesLoading || isLLMResponding || chatMode === "review"
           }
         />
         <SendButton
           onClick={handleConversation}
           type="button"
           disabled={
-            isConversationsLoading || isMessagesLoading || isLLMResponding
+            isConversationsLoading || isMessagesLoading || isLLMResponding || chatMode === "review"
           }
         />
       </div>

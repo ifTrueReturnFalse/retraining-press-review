@@ -1,0 +1,12 @@
+.loaderContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: var(--slate-200);
+  border-radius: 1rem;
+  justify-content: center;
+  align-items: center;
+  width: 30rem;
+  padding: 1rem 2rem;
+  margin: auto;
+}
