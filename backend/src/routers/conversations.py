@@ -207,17 +207,25 @@ async def create_press_review(
 
         # Fetch URLs of relevant articles based on the conversation's context and the requested theme.
         urls = await get_urls_for_review(conversation, body.theme)
-        # Build a LlamaIndex VectorStoreIndex from the scraped article content.
-        index = await build_index(urls)
 
-        # Initialize a query engine from the index and query the LLM for the press review content.
-        query_engine = index.as_query_engine()
-        response = query_engine.query(
-            # LLM prompt instructing it to act as a press review editor.
-            f"Tu es un rédacteur de revue de presse\
-                                      Ton objectif est de rédiger une revue sur ce thème: {body.theme}\
-                                        Soit synthétique, conserve l'essentiel de l'information, cite tes sources"
-        )
+        try:
+            # Build a LlamaIndex VectorStoreIndex from the scraped article content.
+            index = await build_index(urls)
+
+            # Initialize a query engine from the index and query the LLM for the press review content.
+            query_engine = index.as_query_engine()
+            response = query_engine.query(
+                # LLM prompt instructing it to act as a press review editor.
+                f"Tu es un rédacteur de revue de presse\
+                                        Ton objectif est de rédiger une revue sur ce thème: {body.theme}\
+                                            Soit synthétique, conserve l'essentiel de l'information, cite tes sources"
+            )
+        except Exception as error:
+            print(error)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Service de génération de revue de presse temporairement indisponible",
+            ) from error
 
         content = str(response)
 

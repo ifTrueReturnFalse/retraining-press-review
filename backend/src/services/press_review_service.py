@@ -22,7 +22,10 @@ def init_llama_index() -> None:
     )
 
     Settings.llm = MistralAI(
-        model="mistral-small-latest", api_key=app_settings.MISTRAL_API_KEY
+        model="mistral-small-latest",
+        api_key=app_settings.MISTRAL_API_KEY,
+        timeout=20,
+        max_retries=3,
     )
 
 
