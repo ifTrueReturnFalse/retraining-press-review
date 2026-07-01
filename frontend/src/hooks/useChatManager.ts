@@ -118,6 +118,7 @@ export function useChatManager(initialConversationId?: number) {
    */
   const newChat = () => {
     setMessages([]);
+    setPressReviews([]);
     setCurrentConversationId(undefined);
     setMode("chat");
   };
