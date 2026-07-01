@@ -1,5 +1,3 @@
-import httpx
-from config import settings
 from schemas.news import TopNewsResponse, FullArticleResponse
 from pydantic import ValidationError
 from sqlalchemy import select
@@ -27,44 +25,44 @@ async def fetch_top_news() -> str:
     Raises:
         HTTPException: If the API response is not in the expected format.
     """
-    async with httpx.AsyncClient() as client:
-        params = {
-            "source-country": "fr",
-            "language": "fr",
-            "max-news-per-cluster": 1,
-        }
 
-        try:
-            data = await call_worldnews_api("top-news", params)
-        except NewsAPIError as error:
-            print(error)
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Service de news temporairement indisponible",
-            ) from error
+    params = {
+        "source-country": "fr",
+        "language": "fr",
+        "max-news-per-cluster": 1,
+    }
 
-        try:
-            validated_response = TopNewsResponse.model_validate(data)
-        except ValidationError as error:
-            print(error)
-            raise HTTPException(
-                status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                detail="Mauvais format de réponse",
-            )
+    try:
+        data = await call_worldnews_api("top-news", params)
+    except NewsAPIError as error:
+        print(error)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service de news temporairement indisponible",
+        ) from error
 
-        # Extract the first article from each news cluster provided by the API
-        articles = [
-            cluster.news[0] for cluster in validated_response.top_news if cluster.news
-        ]
-
-        # Format the list of articles into a single readable string
-        return "\n".join(
-            [
-                f"- {article.title}: {article.summary or 'Pas de résumé disponible'}"
-                for article in articles
-                if article.title
-            ]
+    try:
+        validated_response = TopNewsResponse.model_validate(data)
+    except ValidationError as error:
+        print(error)
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Mauvais format de réponse",
         )
+
+    # Extract the first article from each news cluster provided by the API
+    articles = [
+        cluster.news[0] for cluster in validated_response.top_news if cluster.news
+    ]
+
+    # Format the list of articles into a single readable string
+    return "\n".join(
+        [
+            f"- {article.title}: {article.summary or 'Pas de résumé disponible'}"
+            for article in articles
+            if article.title
+        ]
+    )
 
 
 async def get_top_news_for_prompt() -> str:
@@ -118,36 +116,35 @@ async def search_news(
     Raises:
         HTTPException: If the API response does not match the expected schema.
     """
-    async with httpx.AsyncClient() as client:
-        # Define search parameters for the World News API
-        params = {
-            "text": query,
-            "source-country": source_country,
-            "language": language,
-            "sort": "publish-time",
-            "sort-direction": "DESC",
-            "api-key": settings.WORLD_NEWS_API_KEY,
-        }
 
-        try:
-            data = await call_worldnews_api("search-news", params)
-        except NewsAPIError as error:
-            print(error)
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Service de news temporairement indisponible",
-            ) from error
+    # Define search parameters for the World News API
+    params = {
+        "text": query,
+        "source-country": source_country,
+        "language": language,
+        "sort": "publish-time",
+        "sort-direction": "DESC",
+    }
 
-        try:
-            validated_response = FullArticleResponse.model_validate(data)
-        except ValidationError as error:
-            print(error)
-            raise HTTPException(
-                status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                detail="Mauvais format de réponse",
-            )
+    try:
+        data = await call_worldnews_api("search-news", params)
+    except NewsAPIError as error:
+        print(error)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service de news temporairement indisponible",
+        ) from error
 
-        return validated_response
+    try:
+        validated_response = FullArticleResponse.model_validate(data)
+    except ValidationError as error:
+        print(error)
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Mauvais format de réponse",
+        )
+
+    return validated_response
 
 
 def store_article_urls(urls: List[str], conversation_id: int):
