@@ -1,3 +1,11 @@
+"""Main application entry point for the NewsFoundry API.
+
+This module initializes the FastAPI application, sets up the lifespan context
+manager for services like LlamaIndex, includes API routers for different
+endpoints, and configures global exception handlers to ensure standardized
+error responses.
+"""
+
 import os
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse

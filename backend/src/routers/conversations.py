@@ -239,6 +239,19 @@ async def create_press_review(
 def get_press_reviews(
     conversation_id: int, current_user: UserModel = Depends(get_current_user)
 ):
+    """
+    Retrieves all press reviews associated with a specific conversation.
+
+    Ensures that the conversation belongs to the currently authenticated user
+    before returning the reviews.
+
+    Args:
+        conversation_id: The ID of the conversation to fetch reviews for.
+        current_user: The authenticated user.
+
+    Returns:
+        An API response containing a list of press reviews, ordered by creation date.
+    """
     with Session(engine) as session:
         get_owned_conversation_or_40X(session, conversation_id, current_user)
         reviews = session.scalars(

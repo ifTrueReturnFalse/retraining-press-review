@@ -11,6 +11,11 @@ from fastapi import HTTPException, status
 
 
 def init_llama_index() -> None:
+    """Initializes the global settings for LlamaIndex.
+
+    Sets the embedding model and the language model (LLM) to be used by
+    LlamaIndex throughout the application, using API keys from settings.
+    """
     Settings.embed_model = MistralAIEmbedding(
         model_name="mistral-embed",
         api_key=app_settings.MISTRAL_API_KEY,
@@ -22,32 +27,40 @@ def init_llama_index() -> None:
 
 
 async def build_index(urls: List[str]) -> VectorStoreIndex:
+    """Builds a LlamaIndex VectorStoreIndex from a list of article URLs.
+
+    Args:
+        urls: A list of URLs to scrape and index.
+
+    Returns:
+        A `VectorStoreIndex` instance containing the vectorized article content.
+    """
     documents = await scrape_articles(urls)
     return VectorStoreIndex.from_documents(documents)
 
 
 async def get_urls_for_review(conversation: ConversationModel, theme: str) -> List[str]:
-    """
-    Retrieves a list of article URLs relevant to a given theme for generating a press review.
+    """Retrieves article URLs for a press review, reusing or fetching as needed.
 
     This function first checks if the conversation already has at least 3 loaded articles.
     If so, it reuses those. Otherwise, it performs a news search based on the theme,
     stores the found article URLs in the conversation's metadata, and returns them.
 
-    @param conversation {ConversationModel}: The conversation object containing existing context.
-    @param theme {str}: The thematic subject for which to find news articles.
+    Args:
+        conversation: The conversation object, which may contain cached URLs.
+        theme: The subject for which to find news articles.
 
-    @returns {List[str]}: A list of URLs of relevant news articles.
+    Returns:
+        A list of relevant news article URLs.
 
-    @throws {HTTPException}:
-        - 404_NOT_FOUND: If no articles are found for the specified theme after a search.
+    Raises:
+        HTTPException: If a search is performed and no articles are found for the theme.
     """
     # Attempt to load previously stored article URLs from the conversation's metadata.
     # The `loaded_articles` field is a JSON string, so it needs to be parsed.
     existing = json.loads(conversation.loaded_articles or "[]")
 
-    # If the conversation already has 3 or more articles loaded,
-    # we reuse them to avoid redundant API calls and maintain context.
+    # If enough articles are already loaded, reuse them to maintain context.
     if len(existing) >= 3:
         return existing
 

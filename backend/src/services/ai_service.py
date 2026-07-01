@@ -9,6 +9,12 @@ from services.news_service import search_news, store_article_urls
 
 @dataclass
 class AgentDeps:
+    """A container for dependencies injected into the AI agent's context.
+
+    Attributes:
+        system_prompt: The dynamic part of the system prompt (e.g., daily news).
+        conversation_id: The ID of the current conversation for context.
+    """
     system_prompt: str
     conversation_id: int
 
@@ -22,38 +28,44 @@ agent = Agent(model, deps_type=AgentDeps)
 
 @agent.system_prompt
 async def base_prompt():
-    """
-    Defines the core persona of the AI agent.
+    """Defines the core persona of the AI agent.
 
-    @returns {str} The base system instruction.
+    Returns:
+        The base system instruction for the agent.
     """
     return "Tu es un assistant pour pigistes."
 
 
 @agent.system_prompt
 async def build_system_prompt(ctx: RunContext[AgentDeps]):
-    """
-    Injects dynamic context (news) into the system prompt.
+    """Injects dynamic context (e.g., news) into the system prompt.
 
-    @param {RunContext[str]} ctx - The context containing dependencies (news string).
-    @returns {str} The formatted prompt with current news.
+    Args:
+        ctx: The agent's run context, containing dependencies like the news string.
+
+    Returns:
+        The formatted system prompt including the latest news.
     """
     # ctx.deps contains the top news fetched from the news_service
     return f"Voici les actualistés du jour :\n{ctx.deps.system_prompt}"
 
 
 @agent.tool
-async def fetch_news(
-    ctx: RunContext[AgentDeps], query: str, language: str = "fr", country: str = "fr"
-) -> str:
-    """
-    Search for specific news articles based on a query and store their URLs for context.
+async def fetch_news(ctx: RunContext[AgentDeps], query: str, language: str = "fr", country: str = "fr") -> str:
+    """Searches for news articles and stores their URLs in the conversation context.
 
-    @param {RunContext[AgentDeps]} ctx - The execution context containing dependencies.
-    @param {str} query - The search keywords.
-    @param {str} language - The language code, ISO 6391 language code (default 'fr').
-    @param {str} country - The country code, ISO 3166 country code (default 'fr').
-    @returns {str} A formatted string of titles and summaries.
+    This tool allows the AI agent to perform targeted news searches and automatically
+    persists the article URLs to the current conversation's metadata for future
+    reference, such as for generating a press review.
+
+    Args:
+        ctx: The agent's run context, used to access the `conversation_id`.
+        query: The search keywords.
+        language: The ISO 639-1 language code (default: "fr").
+        country: The ISO 3166 country code (default: "fr").
+
+    Returns:
+        A formatted string of news titles and summaries for the LLM to process.
     """
 
     conversation_id = ctx.deps.conversation_id
@@ -71,17 +83,19 @@ async def fetch_news(
 
 
 async def chat(
-    user_message: str, history_json: str, system_prompt: str, conversation_id: int
+    user_message: str, history_json: str, system_prompt: str, conversation_id: int,
 ) -> tuple[str, str]:
-    """
-    Processes a user message within a specific conversation context using the AI agent.
+    """Processes a user message using the AI agent and its tools.
 
     Args:
-        user_message (str): The new message sent by the user.
-        history_json (str): The existing conversation history serialized as a JSON string.
+        user_message: The new message from the user.
+        history_json: The existing conversation history as a JSON string.
+        system_prompt: The dynamic context (e.g., news) for the system prompt.
+        conversation_id: The ID of the current conversation.
 
     Returns:
-        tuple[str, str]: A tuple containing (agent_response, updated_history_json).
+        A tuple containing the agent's response and the updated history as a
+        JSON string.
     """
     # Deserialize the JSON history into a list of Pydantic AI message objects
     history = ModelMessagesTypeAdapter.validate_json(history_json)
