@@ -11,6 +11,8 @@ from datetime import datetime, timedelta, timezone
 from fastapi import status, HTTPException
 from typing import List
 import json
+from clients.worldnews_client import call_worldnews_api
+from exceptions import NewsAPIError
 
 
 async def fetch_top_news() -> str:
@@ -29,16 +31,20 @@ async def fetch_top_news() -> str:
         params = {
             "source-country": "fr",
             "language": "fr",
-            "api-key": settings.WORLD_NEWS_API_KEY,
             "max-news-per-cluster": 1,
         }
 
-        response = await client.get(
-            "https://api.worldnewsapi.com/top-news", params=params
-        )
+        try:
+            data = await call_worldnews_api("top-news", params)
+        except NewsAPIError as error:
+            print(error)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Service de news temporairement indisponible",
+            ) from error
 
         try:
-            validated_response = TopNewsResponse.model_validate(response.json())
+            validated_response = TopNewsResponse.model_validate(data)
         except ValidationError as error:
             print(error)
             raise HTTPException(
@@ -123,12 +129,17 @@ async def search_news(
             "api-key": settings.WORLD_NEWS_API_KEY,
         }
 
-        response = await client.get(
-            "https://api.worldnewsapi.com/search-news", params=params
-        )
+        try:
+            data = await call_worldnews_api("search-news", params)
+        except NewsAPIError as error:
+            print(error)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Service de news temporairement indisponible",
+            ) from error
 
         try:
-            validated_response = FullArticleResponse.model_validate(response.json())
+            validated_response = FullArticleResponse.model_validate(data)
         except ValidationError as error:
             print(error)
             raise HTTPException(
