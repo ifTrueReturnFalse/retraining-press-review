@@ -17,14 +17,16 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Authenticates a user and returns a JWT access token.
 
-    Args:
-        form_data (OAuth2PasswordRequestForm): The OAuth2 compatible form containing username (email) and password.
+    This endpoint follows the OAuth2 password flow.
 
-    Raises:
-        HTTPException: 401 Unauthorized if the email or password is incorrect.
+    Args:
+        form_data: The OAuth2 compatible form containing username (email) and password.
 
     Returns:
-        dict: A dictionary containing the 'access_token' and 'token_type'.
+        An API response containing the access token and token type.
+
+    Raises:
+        HTTPException: 401 Unauthorized if credentials are incorrect.
     """
     with Session(engine) as session:
         query = select(UserModel).where(UserModel.email == form_data.username)

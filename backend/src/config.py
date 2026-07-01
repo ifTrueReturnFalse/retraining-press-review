@@ -1,3 +1,11 @@
+"""Application configuration management.
+
+This module defines the application's configuration settings using Pydantic's
+BaseSettings. It allows for loading configuration from environment variables
+and a `.env` file, ensuring that all necessary settings are present and
+correctly typed.
+"""
+
 from pathlib import Path
 from pydantic import EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -6,6 +14,11 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
+    """Defines the application's configuration settings.
+
+    Settings are loaded from environment variables or a `.env` file.
+    """
+
     APP_ENV: str = "production"
 
     DATABASE_URL: str

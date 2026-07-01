@@ -18,6 +18,7 @@ from services.news_service import get_top_news_for_prompt
 from services.press_review_service import get_urls_for_review, build_index
 from utils.conversations import get_owned_conversation_or_40X
 from typing import List
+from exceptions import MistralAPIError
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
@@ -138,13 +139,22 @@ async def post_message(
             session, conversation_id, current_user
         )
 
-        # Fetch fresh news context and process the chat through the AI service
-        response, new_history = await chat(
-            body.message,
-            conversation.history_json,
-            await get_top_news_for_prompt(),
-            conversation_id,
-        )
+        top_news = await get_top_news_for_prompt()
+
+        try:
+            # Fetch fresh news context and process the chat through the AI service
+            response, new_history = await chat(
+                body.message,
+                conversation.history_json,
+                top_news,
+                conversation_id,
+            )
+        except MistralAPIError as error:
+            print(error)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Service de chat temporairement indisponible",
+            ) from error
 
         # Update the conversation history in the database with the new serialized JSON
         conversation.history_json = new_history
@@ -197,17 +207,25 @@ async def create_press_review(
 
         # Fetch URLs of relevant articles based on the conversation's context and the requested theme.
         urls = await get_urls_for_review(conversation, body.theme)
-        # Build a LlamaIndex VectorStoreIndex from the scraped article content.
-        index = await build_index(urls)
 
-        # Initialize a query engine from the index and query the LLM for the press review content.
-        query_engine = index.as_query_engine()
-        response = query_engine.query(
-            # LLM prompt instructing it to act as a press review editor.
-            f"Tu es un rédacteur de revue de presse\
-                                      Ton objectif est de rédiger une revue sur ce thème: {body.theme}\
-                                        Soit synthétique, conserve l'essentiel de l'information, cite tes sources"
-        )
+        try:
+            # Build a LlamaIndex VectorStoreIndex from the scraped article content.
+            index = await build_index(urls)
+
+            # Initialize a query engine from the index and query the LLM for the press review content.
+            query_engine = index.as_query_engine()
+            response = query_engine.query(
+                # LLM prompt instructing it to act as a press review editor.
+                f"Tu es un rédacteur de revue de presse\
+                                        Ton objectif est de rédiger une revue sur ce thème: {body.theme}\
+                                            Soit synthétique, conserve l'essentiel de l'information, cite tes sources"
+            )
+        except Exception as error:
+            print(error)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Service de génération de revue de presse temporairement indisponible",
+            ) from error
 
         content = str(response)
 
@@ -239,6 +257,19 @@ async def create_press_review(
 def get_press_reviews(
     conversation_id: int, current_user: UserModel = Depends(get_current_user)
 ):
+    """
+    Retrieves all press reviews associated with a specific conversation.
+
+    Ensures that the conversation belongs to the currently authenticated user
+    before returning the reviews.
+
+    Args:
+        conversation_id: The ID of the conversation to fetch reviews for.
+        current_user: The authenticated user.
+
+    Returns:
+        An API response containing a list of press reviews, ordered by creation date.
+    """
     with Session(engine) as session:
         get_owned_conversation_or_40X(session, conversation_id, current_user)
         reviews = session.scalars(

@@ -8,6 +8,19 @@ from llama_index.core import Document
 async def fetch_html(
     session: aiohttp.ClientSession, url: str, semaphore: asyncio.Semaphore
 ) -> Optional[str]:
+    """Asynchronously fetches the HTML content of a single URL.
+
+    Uses a semaphore to limit concurrent requests and handles potential
+    client errors or timeouts gracefully.
+
+    Args:
+        session: The `aiohttp.ClientSession` to use for the request.
+        url: The URL to fetch.
+        semaphore: An `asyncio.Semaphore` to limit concurrency.
+
+    Returns:
+        The HTML content as a string if successful, otherwise `None`.
+    """
     async with semaphore:
         try:
             async with session.get(url) as response:
