@@ -1,8 +1,24 @@
 from config import settings
 import httpx
 from exceptions import NewsAPIError
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 
+# Apply a retry mechanism to the API call.
+# It retries if a `NewsAPIError` occurs, up to 3 attempts.
+# The waiting time between retries increases exponentially:
+# 1st retry: 2 seconds, 2nd retry: 4 seconds, 3rd retry: 8 seconds.
+# This helps to handle transient network issues or temporary API unavailability.
+@retry(
+    retry=retry_if_exception_type(NewsAPIError),
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+)
 async def call_worldnews_api(endpoint: str, params: dict) -> dict:
     """Makes an asynchronous request to a specified World News API endpoint.
 
