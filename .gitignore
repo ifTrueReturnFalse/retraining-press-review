@@ -10,3 +10,7 @@ wheels/
 .venv
 
 .env
+
+# Test files / folders
+test.db
+.pytest_cache
