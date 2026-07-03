@@ -1,9 +1,10 @@
 from config import settings
 import httpx
-from exceptions import NewsAPIError
+from exceptions import NewsAPIError, NewsAPITimeoutError
 from tenacity import (
     retry,
     retry_if_exception_type,
+    retry_unless_exception_type,
     stop_after_attempt,
     wait_exponential,
     before_sleep_log,
@@ -27,7 +28,8 @@ if not logger.handlers:
 # 1st retry: 2 seconds, 2nd retry: 4 seconds, 3rd retry: 8 seconds.
 # This helps to handle transient network issues or temporary API unavailability.
 @retry(
-    retry=retry_if_exception_type(NewsAPIError),
+    retry=retry_if_exception_type(NewsAPIError)
+    & retry_unless_exception_type(NewsAPITimeoutError),
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=10),
     before_sleep=before_sleep_log(logger, logging.WARNING),
@@ -54,14 +56,16 @@ async def call_worldnews_api(endpoint: str, params: dict) -> dict:
     safe_params = {k: v for k, v in params.items() if k != "api-key"}
     logger.info("→ Appel %s avec params=%s", endpoint, safe_params)
 
-    async with httpx.AsyncClient(timeout=15.0) as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             response = await client.get(
                 f"https://api.worldnewsapi.com/{endpoint}", params=params
             )
         except httpx.TimeoutException as error:
             logger.error("Timeout sur %s", endpoint)
-            raise NewsAPIError(f"Timeout lors de l'appel à {endpoint}") from error
+            raise NewsAPITimeoutError(
+                f"Timeout lors de l'appel à {endpoint}"
+            ) from error
 
         logger.debug(
             "← %s status=%s headers=%s",

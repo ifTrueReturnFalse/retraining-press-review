@@ -14,6 +14,7 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
+from exceptions import NewsAPIError
 
 
 @dataclass
@@ -85,8 +86,15 @@ async def fetch_news(
     """
 
     conversation_id = ctx.deps.conversation_id
-    # Call the external news API service
-    result = await search_news(query, country, language)
+    try:
+        # Call the external news API service
+        result = await search_news(query, country, language)
+    except NewsAPIError:
+        return (
+            "La recherche de news a échoué (service temporairement indisponible). "
+            "Informe l'utilisateur que tu n'as pas pu chercher les news maintenant "
+            "et propose-lui de réessayer dans quelques instants."
+        )
 
     # Extract URLs to persist them in the conversation's metadata
     url_list = [news.url for news in result.news if news.url]

@@ -8,6 +8,7 @@ from models.conversations import ConversationModel
 import json
 from services.news_service import search_news, store_article_urls
 from fastapi import HTTPException, status
+from exceptions import NewsAPIError
 
 
 def init_llama_index() -> None:
@@ -67,9 +68,18 @@ async def get_urls_for_review(conversation: ConversationModel, theme: str) -> Li
     if len(existing) >= 3:
         return existing
 
-    # If fewer than 3 articles are available, perform a new search for articles
-    # related to the specified theme using the external news service.
-    result = await search_news(theme, "fr", "fr")
+    try:
+        # If fewer than 3 articles are available, perform a new search for articles
+        # related to the specified theme using the external news service.
+        result = await search_news(theme, "fr", "fr")
+
+    except NewsAPIError as error:
+        print(error)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service de news temporairement indisponible",
+        ) from error
+
     url_list = [news.url for news in result.news if news.url]
 
     # If the news search yields no articles, raise an HTTPException.

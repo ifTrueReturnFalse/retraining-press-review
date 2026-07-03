@@ -21,6 +21,15 @@ class NewsAPIError(ExternalAPIError):
     pass
 
 
+class NewsAPITimeoutError(NewsAPIError):
+    """Specific exception for errors originating from the News API.
+    This allows for more granular error handling for issues related to news fetching,
+    such as timeouts, invalid responses, or API-reported failures.
+    """
+
+    pass
+
+
 class MistralAPIError(ExternalAPIError):
     """Specific exception for errors originating from the Mistral AI API.
     This allows for more granular error handling for issues related to Mistral AI

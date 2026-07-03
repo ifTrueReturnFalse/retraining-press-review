@@ -126,14 +126,7 @@ async def search_news(
         "sort-direction": "DESC",
     }
 
-    try:
-        data = await call_worldnews_api("search-news", params)
-    except NewsAPIError as error:
-        print(error)
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service de news temporairement indisponible",
-        ) from error
+    data = await call_worldnews_api("search-news", params)
 
     try:
         validated_response = FullArticleResponse.model_validate(data)
