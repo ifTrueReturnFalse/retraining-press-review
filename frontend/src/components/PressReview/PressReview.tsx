@@ -16,6 +16,14 @@ export default function PressReview({
   generatedAt,
   content,
 }: PressReviewProps) {
+  const handleCopyReview = async (content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className={styles.review}>
       <div className={styles.reviewHeader}>
@@ -39,7 +47,11 @@ export default function PressReview({
             </span>
           </p>
         </div>
-        <BlackButton buttonText="Copier" className={styles.copyButton} />
+        <BlackButton
+          buttonText="Copier"
+          className={styles.copyButton}
+          onClick={() => handleCopyReview(content)}
+        />
       </div>
 
       <div>
