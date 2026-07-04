@@ -12,7 +12,8 @@
   font-size: var(--text-base);
   transition:
     background-color 0.3s ease-in-out,
-    color 0.3s ease;
+    color 0.3s ease,
+    padding 0.35s ease;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -29,6 +30,7 @@
 .button:disabled {
   background-color: var(--slate-400);
   color: var(--slate-600);
+  padding: 0;
 }
 
 .button:disabled svg path {

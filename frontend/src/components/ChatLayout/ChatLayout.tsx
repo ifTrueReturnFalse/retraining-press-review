@@ -192,7 +192,10 @@ export default function ChatLayout({
             [styles.hidden]: currentConversationId === undefined,
           })}
         >
-          <GenerateReviewButton onClick={() => setIsModalOpen(true)} />
+          <GenerateReviewButton
+            onClick={() => setIsModalOpen(true)}
+            disabled={currentConversationId === undefined}
+          />
         </div>
       </header>
 
@@ -271,14 +274,20 @@ export default function ChatLayout({
           onChange={setChatInput}
           onSubmit={handleConversation}
           disabled={
-            isConversationsLoading || isMessagesLoading || isLLMResponding || chatMode === "review"
+            isConversationsLoading ||
+            isMessagesLoading ||
+            isLLMResponding ||
+            chatMode === "review"
           }
         />
         <SendButton
           onClick={handleConversation}
           type="button"
           disabled={
-            isConversationsLoading || isMessagesLoading || isLLMResponding || chatMode === "review"
+            isConversationsLoading ||
+            isMessagesLoading ||
+            isLLMResponding ||
+            chatMode === "review"
           }
         />
       </div>
