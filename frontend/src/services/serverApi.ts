@@ -1,6 +1,7 @@
-"use server"
+"use server";
 
 import { cookies } from "next/headers";
+import { extractErrorMessage } from "@/utils/httpError";
 
 /**
  * A wrapper around the native fetch API for server-side requests.
@@ -36,11 +37,16 @@ export async function serverFetch<T>(
     },
   );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "La requête sur l'API backend a échoué");
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Réponse invalide du serveur");
   }
 
-  return data;
+  if (!response.ok) {
+    throw new Error(extractErrorMessage(data, "La requête sur l'API a échoué"));
+  }
+
+  return data as T;
 }

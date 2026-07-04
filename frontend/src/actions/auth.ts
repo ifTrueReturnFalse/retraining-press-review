@@ -5,10 +5,11 @@ import { LoginResponseSchema } from "@/schemas/authSchemas";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { extractErrorMessage } from "@/utils/httpError";
 
 /**
  * Authenticates a user using their credentials.
- * It communicates with the backend API, validates the response, 
+ * It communicates with the backend API, validates the response,
  * and securely sets an HTTP-only cookie with the access token if successful.
  *
  * @param data - The login credentials containing the user's email and password.
@@ -29,11 +30,23 @@ export async function loginAction(data: LoginModel) {
       },
     );
 
-    if (!response.ok) {
-      return { success: false, message: "Identifiants invalides" };
+    let rawData: unknown;
+    try {
+      rawData = await response.json();
+    } catch {
+      return { success: false, message: "Réponse invalide du serveur" };
     }
 
-    const rawData = await response.json();
+    if (!response.ok) {
+      return {
+        success: false,
+        message: extractErrorMessage(
+          rawData,
+          "Email ou mot de passe incorrect",
+        ),
+      };
+    }
+
     // 2. Safely parse and validate the API response structure using Zod
     const parsedResponse = LoginResponseSchema.safeParse(rawData);
 
@@ -50,15 +63,11 @@ export async function loginAction(data: LoginModel) {
 
     const apiData = parsedResponse.data;
 
-    if (!apiData.success) {
+    if (!apiData.success || !apiData.data) {
       return {
         success: false,
         message: apiData.message || "Identifiants invalides",
       };
-    }
-
-    if (!apiData.data) {
-      return { success: false, message: "Le serveur a envoyé une réponse nulle" };
     }
 
     // 3. Store the access token securely in the user's cookies
@@ -68,7 +77,7 @@ export async function loginAction(data: LoginModel) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",
-      maxAge: 60 * 60 * 4
+      maxAge: 60 * 60 * 4,
     });
 
     return { success: true };
