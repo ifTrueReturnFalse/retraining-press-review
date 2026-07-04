@@ -217,7 +217,18 @@ export default function ChatLayout({
       </aside>
 
       <main className={styles.mRight} ref={appRef}>
-        {!currentConversationId && <ChatGreetings />}
+        {!currentConversationId && (
+          <>
+            <ChatGreetings />
+            {isLLMResponding && (
+              <LottieLoader
+                src="/animations/spinner.json"
+                style={{ height: "4rem", width: "4rem" }}
+              />
+            )}
+          </>
+        )}
+
         {currentConversationId && chatMode === "chat" && (
           <div className={styles.messageContainer}>
             {isMessagesLoading && (

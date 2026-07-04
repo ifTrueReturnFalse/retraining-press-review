@@ -13,6 +13,7 @@ import {
 } from "@/schemas/chatSchema";
 import { serverFetch } from "@/services/serverApi";
 import { parseHistory } from "@/utils/parseHistory";
+import { sleep } from "@/utils/timeUtils";
 import { z } from "zod";
 
 /**
