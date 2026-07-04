@@ -11,6 +11,8 @@ import {
 import { ConversationSummary, Message } from "@/models/chatModel";
 import { PressReview } from "@/models/pressReviewModel";
 import { useEffect, useState } from "react";
+import { unwrapResult, notifyError } from "@/utils/apiResult";
+import { toast } from "sonner";
 
 export type chatModeType = "chat" | "review";
 
@@ -36,7 +38,6 @@ export function useChatManager(initialConversationId?: number) {
   // Reviews
   const [pressReviews, setPressReviews] = useState<PressReview[]>([]);
   const [isPressReviewLoading, setIsPressReviewLoading] = useState(false);
-  const [pressReviewError, setPressReviewError] = useState("");
 
   /**
    * Fetches the list of all available conversation summaries.
@@ -45,7 +46,13 @@ export function useChatManager(initialConversationId?: number) {
     try {
       setIsConversationsLoading(true);
       const result = await getConversationsAction();
-      if (result.success) setConversations(result.data ?? []);
+      const data = unwrapResult(
+        result,
+        "Impossible de récupérer les conversations",
+      );
+      setConversations(data ?? []);
+    } catch (error) {
+      notifyError(error, "Impossible de récupérer les conversations");
     } finally {
       setIsConversationsLoading(false);
     }
@@ -59,11 +66,15 @@ export function useChatManager(initialConversationId?: number) {
    * @returns A Promise that resolves when the fetch operation is complete.
    */
   const fetchPressReviews = async (conversationId: number) => {
-    const result = await getPressReviewsAction(conversationId);
-    if (result.success) {
-      setPressReviews(result.data ?? []);
-    } else {
-      console.error(result.message);
+    try {
+      const result = await getPressReviewsAction(conversationId);
+      const data = unwrapResult(
+        result,
+        "Impossible de récupérer les revues de presse",
+      );
+      setPressReviews(data);
+    } catch (error) {
+      notifyError(error, "Impossible de récupérer les revues de presse");
     }
   };
 
@@ -85,12 +96,15 @@ export function useChatManager(initialConversationId?: number) {
         fetchPressReviews(conversationId),
       ]);
 
-      if (messagesResult.success) {
-        setCurrentConversationId(conversationId);
-        setMessages(messagesResult.data ?? []);
-      }
+      const data = unwrapResult(
+        messagesResult,
+        "Impossible de charger la conversation",
+      );
+
+      setCurrentConversationId(conversationId);
+      setMessages(data ?? []);
     } catch (error) {
-      console.error(error);
+      notifyError(error, "Impossible de charger la conversation");
     } finally {
       setIsMessagesLoading(false);
     }
@@ -132,14 +146,15 @@ export function useChatManager(initialConversationId?: number) {
    * Triggers the creation of a new conversation on the server.
    */
   const createConversation = async () => {
-    const data = await createConversationAction();
-    if (!data.success) throw new Error(data.message);
-    if (!data.data)
-      throw new Error("Le serveur n'a pas renvoyé de conversation");
+    const result = await createConversationAction();
+    const data = unwrapResult(
+      result,
+      "Le serveur n'a pas renvoyé de conversation",
+    );
 
     fetchConversations();
 
-    return data.data.id;
+    return data.id;
   };
 
   /**
@@ -174,23 +189,20 @@ export function useChatManager(initialConversationId?: number) {
 
       // Request the AI response from the server
       const result = await sendMessageAction(convId, content);
-      if (!result.success) {
-        throw new Error(result.message);
-      }
-
-      if (!result.data) {
-        throw new Error("Le LLM n'a pas envoyé de réponse");
-      }
+      const replyContent = unwrapResult(
+        result,
+        "Le LLM n'a pas envoyé de réponse",
+      );
 
       const assistantMessage: Message = {
         role: "assistant",
-        content: result.data,
+        content: replyContent,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error(error);
+      notifyError(error, "Erreur lors de l'envoi du message");
     } finally {
       setIsLLMResponding(false);
     }
@@ -212,22 +224,20 @@ export function useChatManager(initialConversationId?: number) {
 
     try {
       setIsPressReviewLoading(true);
-      setPressReviewError("");
 
       const result = await generatePressReviewAction(
         currentConversationId,
         theme,
       );
+      const data = unwrapResult(
+        result,
+        "Erreur lors de la génération de la revue de presse",
+      );
 
-      if (!result.success) {
-        setPressReviewError(result.message);
-        return;
-      }
-
-      setPressReviews((prev) => [...prev, result.data]);
+      setPressReviews((prev) => [...prev, data]);
+      toast.success("Revue de presse générée !");
     } catch (error) {
-      console.error(error);
-      setPressReviewError("Erreur lors de la génération de la revue de presse");
+      notifyError(error, "Erreur lors de la génération de la revue de presse");
     } finally {
       setIsPressReviewLoading(false);
       setReviewTheme("");
@@ -302,6 +312,5 @@ export function useChatManager(initialConversationId?: number) {
     pressReviews,
     generatePressReview,
     isPressReviewLoading,
-    pressReviewError,
   };
 }
