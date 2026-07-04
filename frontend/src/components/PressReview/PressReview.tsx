@@ -4,6 +4,7 @@ import styles from "./PressReview.module.css";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getWeekNumber } from "@/utils/timeUtils";
+import { toast } from "sonner";
 
 interface PressReviewProps {
   newsType: string;
@@ -19,8 +20,9 @@ export default function PressReview({
   const handleCopyReview = async (content: string) => {
     try {
       await navigator.clipboard.writeText(content);
-    } catch (error) {
-      console.log(error);
+      toast.success("Revue de presse copiée !");
+    } catch {
+      toast.error("Impossible de copier dans le presse papier!")
     }
   };
 
