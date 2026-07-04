@@ -1,42 +1,63 @@
 "use server";
 
 import {
+  Message,
   Conversation,
-  ConversationResponse,
   GetAllConversationsResponse,
   ConversationSummary,
-  RawConversationResponse,
 } from "@/models/chatModel";
-import { GetAllConversationsResponseSchema } from "@/schemas/chatSchema";
+import {
+  GetAllConversationsResponseSchema,
+  // ConversationResponseSchema, // Not used, RawConversationResponseSchema is used instead
+  RawConversationResponseSchema,
+} from "@/schemas/chatSchema";
 import { serverFetch } from "@/services/serverApi";
 import { parseHistory } from "@/utils/parseHistory";
 import { z } from "zod";
 
 /**
- * Server action to initialize a new chat conversation.
- * It calls the backend API to persist a new conversation record.
+ * Server action to create a new conversation.
+ * It sends a POST request to the backend API to create a new conversation record.
+ * The response is validated using `RawConversationResponseSchema` and the history is parsed.
  *
- * @returns A promise resolving to a success object with the new Conversation
- *          or a failure object with an error message.
+ * @returns A promise resolving to an object indicating success or failure. If successful, it contains the newly created `Conversation` object.
  */
 export async function createConversationAction(): Promise<
   { success: true; data: Conversation } | { success: false; message: string }
 > {
   try {
-    // Perform an authenticated POST request to the backend /conversations endpoint
-    const data = await serverFetch<ConversationResponse>("/conversations", {
-      method: "POST",
-    });
+    const rawData = await serverFetch("/conversations", { method: "POST" });
 
-    // Validate the API response structure and success flag
-    if (!data.success || !data.data) {
+    const parsedResponse = RawConversationResponseSchema.safeParse(rawData);
+
+    if (!parsedResponse.success) {
+      console.error(
+        "Erreur de validation de l'API : ",
+        z.treeifyError(parsedResponse.error),
+      );
       return {
         success: false,
-        message: data.message || "Echec lors de la création de la discussion",
+        message: "Erreur de communication avec le serveur",
       };
     }
 
-    return { success: true, data: data.data };
+    const apiData = parsedResponse.data;
+
+    if (!apiData.success || !apiData.data) {
+      return {
+        success: false,
+        message:
+          apiData.message || "Echec lors de la création de la discussion",
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        ...apiData.data,
+        history_json: parseHistory(apiData.data.history_json),
+      },
+    };
   } catch (error) {
     console.error("Crash lors de la création d'une discussion", error);
     return {
@@ -47,10 +68,10 @@ export async function createConversationAction(): Promise<
 }
 
 /**
- * Server action to retrieve all conversations for the authenticated user.
+ * Server action to retrieve all conversation summaries for the current user.
+ * It fetches data from the backend API and validates the response using `GetAllConversationsResponseSchema`.
  *
- * @returns A promise resolving to the API response containing an array of conversation summaries
- *          or an error object if the request fails.
+ * @returns A promise resolving to an object indicating success or failure. If successful, it contains an array of `ConversationSummary` objects.
  */
 export async function getConversationsAction(): Promise<
   | { success: true; data: ConversationSummary[] }
@@ -70,6 +91,10 @@ export async function getConversationsAction(): Promise<
         "Erreur de validation de l'API",
         z.treeifyError(parsedResponse.error),
       );
+      return {
+        success: false,
+        message: "Erreur de communication avec le serveur",
+      };
     }
 
     const apiData = parsedResponse.data;
@@ -91,19 +116,44 @@ export async function getConversationsAction(): Promise<
   }
 }
 
-export async function getConversationMessagesAction(conversationId: number) {
+/**
+ * Server action to retrieve all messages for a specific conversation.
+ * It fetches data from the backend API using the conversation ID and validates the response.
+ * The raw history string from the API is parsed into a `Message` array.
+ *
+ * @param conversationId The ID of the conversation to retrieve messages from.
+ * @returns A promise resolving to an object indicating success or failure. If successful, it contains an array of `Message` objects.
+ */
+export async function getConversationMessagesAction(
+  conversationId: number,
+): Promise<
+  { success: true; data: Message[] } | { success: false; message: string }
+> {
   try {
-    const data = await serverFetch<RawConversationResponse>(
-      `/conversations/${conversationId}`,
-    );
+    const rawData = await serverFetch(`/conversations/${conversationId}`);
 
-    if (!data.success || !data.data) {
+    const parsedResponse = RawConversationResponseSchema.safeParse(rawData);
+
+    if (!parsedResponse.success) {
+      console.error(
+        "Erreur de validation de l'API : ",
+        z.treeifyError(parsedResponse.error),
+      );
+      return {
+        success: false,
+        message: "Erreur de communication avec le serveur",
+      };
+    }
+
+    const apiData = parsedResponse.data;
+
+    if (!apiData.success || !apiData.data) {
       return { success: false, message: "Conversation introuvable" };
     }
 
     return {
       success: true,
-      data: parseHistory(data.data.history_json),
+      data: parseHistory(apiData.data.history_json),
     };
   } catch (error) {
     console.error(error);
@@ -111,12 +161,23 @@ export async function getConversationMessagesAction(conversationId: number) {
   }
 }
 
+/**
+ * Server action to send a message within a specific conversation.
+ * It sends a POST request to the backend API with the message content.
+ * The response, which typically contains the AI's reply, is validated and returned.
+ *
+ * @param conversationId The ID of the conversation to send the message to.
+ * @param message The content of the message to send.
+ * @returns A promise resolving to an object indicating success or failure. If successful, it contains the AI's response message as a string.
+ */
 export async function sendMessageAction(
   conversationId: number,
   message: string,
-) {
+): Promise<
+  { success: true; data: string } | { success: false; message: string }
+> {
   try {
-    const data = await serverFetch<ConversationResponse>(
+    const rawData = await serverFetch(
       `/conversations/${conversationId}/messages`,
       {
         method: "POST",
@@ -124,11 +185,26 @@ export async function sendMessageAction(
       },
     );
 
-    if (!data.success || !data.message) {
+    const parsedResponse = RawConversationResponseSchema.safeParse(rawData);
+
+    if (!parsedResponse.success) {
+      console.error(
+        "Erreur de validation de l'API : ",
+        z.treeifyError(parsedResponse.error),
+      );
+      return {
+        success: false,
+        message: "Erreur de communication avec le serveur",
+      };
+    }
+
+    const apiData = parsedResponse.data;
+
+    if (!apiData.success || !apiData.message) {
       return { success: false, message: "Pas de réponse du serveur" };
     }
 
-    return { success: true, data: data.message };
+    return { success: true, data: apiData.message };
   } catch (error) {
     console.error(error);
     return { success: false, message: "Erreur serveur" };

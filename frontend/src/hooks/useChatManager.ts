@@ -174,7 +174,13 @@ export function useChatManager(initialConversationId?: number) {
 
       // Request the AI response from the server
       const result = await sendMessageAction(convId, content);
-      if (!result.success || !result.data) throw new Error(result.message);
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+
+      if (!result.data) {
+        throw new Error("Le LLM n'a pas envoyé de réponse");
+      }
 
       const assistantMessage: Message = {
         role: "assistant",

@@ -1,7 +1,7 @@
 import {
-  Conversation,
+  ConversationSchema,
   ConversationResponseSchema,
-  ConversationSummary,
+  ConversationSummarySchema,
   GetAllConversationsResponseSchema,
   MessageSchema,
   RawConversationResponseSchema,
@@ -9,12 +9,12 @@ import {
 import { z } from "zod";
 
 export type Message = z.infer<typeof MessageSchema>;
-export type Conversation = z.infer<typeof Conversation>;
+export type Conversation = z.infer<typeof ConversationSchema>;
 export type ConversationResponse = z.infer<typeof ConversationResponseSchema>;
 export type RawConversationResponse = z.infer<
   typeof RawConversationResponseSchema
 >;
-export type ConversationSummary = z.infer<typeof ConversationSummary>;
+export type ConversationSummary = z.infer<typeof ConversationSummarySchema>;
 export type GetAllConversationsResponse = z.infer<
   typeof GetAllConversationsResponseSchema
 >;

@@ -7,28 +7,30 @@ export const MessageSchema = z.object({
   timestamp: z.coerce.date(),
 });
 
-export const Conversation = z.object({
+export const ConversationSchema = z.object({
   id: z.int(),
   user_id: z.int(),
   history_json: z.array(MessageSchema),
   created_at: z.coerce.date(),
 });
 
-export const RawConversation = z.object({
+export const RawConversationSchema = z.object({
   id: z.int(),
   user_id: z.int(),
   history_json: z.string(),
   created_at: z.coerce.date(),
 });
 
-export const ConversationSummary = Conversation.pick({
+export const ConversationSummarySchema = ConversationSchema.pick({
   id: true,
   created_at: true,
 });
 
-export const ConversationResponseSchema = createApiResponseSchema(Conversation);
-export const RawConversationResponseSchema =
-  createApiResponseSchema(RawConversation);
+export const ConversationResponseSchema =
+  createApiResponseSchema(ConversationSchema);
+export const RawConversationResponseSchema = createApiResponseSchema(
+  RawConversationSchema,
+);
 export const GetAllConversationsResponseSchema = createApiResponseSchema(
-  z.array(ConversationSummary),
+  z.array(ConversationSummarySchema),
 );
