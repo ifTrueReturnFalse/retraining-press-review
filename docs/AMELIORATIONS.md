@@ -100,8 +100,8 @@ Même une intégration minimale (tracing des appels agent uniquement, pas tout l
 | Piste | Catégorie | Effort |
 |---|---|---|
 | VectorStoreIndex bloquant | Performance backend | Faible |
-| Concurrence & cache (Celery/Redis) | Performance backend | Moyen |
-| MLflow | Observabilité | Moyen |
+| Concurrence & cache (Celery/Redis) | Performance backend | Elevé |
+| MLflow | Observabilité | Moyen à élevé |
 | Temps de génération des revues | Observabilité | Faible |
 | Streaming des réponses | UX | Moyen à élevé |
-| Responsive design | UX | Moyen à élevé |
+| Responsive design | UX | Faible à moyen |
