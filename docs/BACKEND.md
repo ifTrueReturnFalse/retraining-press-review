@@ -267,7 +267,7 @@ docker build -t newsfoundry-api .
 docker run --env-file .env newsfoundry-api
 ```
  
-Variables d'environnement nécessaires : [.env.example](../backend/.env.example).
+Variables d'environnement nécessaires : [`.env.example`](../backend/.env.example).
  
 ## Lancer les tests
  

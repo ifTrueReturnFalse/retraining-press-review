@@ -182,7 +182,7 @@ pnpm install
 pnpm dev
 ```
  
-Variables d'environnement nécessaires : [.env.example](../frontend/.env.example)
+Variables d'environnement nécessaires : [`.env.example`](../frontend/.env.example)
 
 ## Tests
  
