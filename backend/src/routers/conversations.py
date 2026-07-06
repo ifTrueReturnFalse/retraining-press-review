@@ -216,9 +216,20 @@ async def create_press_review(
             query_engine = index.as_query_engine()
             response = query_engine.query(
                 # LLM prompt instructing it to act as a press review editor.
-                f"Tu es un rédacteur de revue de presse\
-                                        Ton objectif est de rédiger une revue sur ce thème: {body.theme}\
-                                            Soit synthétique, conserve l'essentiel de l'information, cite tes sources"
+                f"Tu es un rédacteur de revue de presse pour un pigiste, avec une vraie plume "
+                f"journalistique — pas un simple résumé factuel.\n\n"
+                f"Thème : {body.theme}\n\n"
+                f"Structure à respecter (reste compact, quitte à être moins exhaustif) :\n"
+                f"1. Une accroche en une phrase qui donne le ton du sujet.\n"
+                f"2. Le corps : 2 à 4 paragraphes courts, organisés par angle ou sous-thème "
+                f"(pas juste liste chronologique des articles).\n"
+                f"3. Une phrase de conclusion qui ouvre une perspective ou soulève une question.\n\n"
+                f"Consignes de style :\n"
+                f"- Écris comme un article, pas comme un compte-rendu : varie les formulations, "
+                f"évite les tournures robotiques du type 'Il est à noter que'.\n"
+                f"- Cite tes sources de façon fluide, intégrée à la phrase (pas en liste à part).\n"
+                f"- Si le contenu disponible est mince, ne le compense pas en délayant : reste "
+                f"court et assume une revue brève plutôt que de la remplir artificiellement."
             )
         except Exception as error:
             print(error)

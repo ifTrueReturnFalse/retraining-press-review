@@ -27,6 +27,7 @@ def init_llama_index() -> None:
         api_key=app_settings.MISTRAL_API_KEY,
         timeout=20,
         max_retries=3,
+        max_tokens=2048,
     )
 
 
