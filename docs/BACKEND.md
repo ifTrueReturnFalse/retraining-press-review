@@ -264,7 +264,7 @@ exec uv run api               # démarre l'API
  
 ```bash
 docker build -t newsfoundry-api .
-docker run --env-file .env newsfoundry-api
+docker run --env-file .env -p 8000:8000 newsfoundry-api
 ```
  
 Variables d'environnement nécessaires : [`.env.example`](../backend/.env.example).

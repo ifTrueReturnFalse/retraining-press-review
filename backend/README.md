@@ -122,7 +122,7 @@ The container is driven by `entrypoint.sh`, which chains migrations → DB init 
  
 ```bash
 docker build -t newsfoundry-api .
-docker run --env-file .env newsfoundry-api
+docker run --env-file .env -p 8000:8000 newsfoundry-api
 ```
  
 Required environment variables: [`.env.example`](.env.example)
