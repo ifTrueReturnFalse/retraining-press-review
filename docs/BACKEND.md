@@ -248,6 +248,7 @@ Le projet utilise des scripts `uv` définis dans `pyproject.toml` (`start_db`, `
 **En développement**
  
 ```bash
+uv sync           # installe les dépendances depuis uv.lock
 uv run start_db   # démarre un conteneur PostgreSQL
 uv run api        # lance l'API FastAPI
 ```
