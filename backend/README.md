@@ -112,6 +112,7 @@ NewsFoundry's **FastAPI** (Python 3.13) backend. It exposes the AI chat and pres
 **Development**
  
 ```bash
+uv sync           # installe les dépendances depuis uv.lock
 uv run start_db   # starts a PostgreSQL container
 uv run api        # launches the FastAPI API
 ```
