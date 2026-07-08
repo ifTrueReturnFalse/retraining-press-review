@@ -133,6 +133,7 @@ Frontend (Next.js) ──► FastAPI API ──► PostgreSQL
 - 📐 [`docs/BACKEND.md`](./docs/BACKEND.md) - backend architecture, data model, implementation choices
 - 🎨 [`docs/FRONTEND.md`](./docs/FRONTEND.md) - frontend architecture, implementation choices
 - 🔄 [`docs/FLUX.md`](./docs/FLUX.md) - sequence diagrams (chat, press review, auth)
+- 🧠 [`docs/PROMPTS.md`](./docs/PROMPTS.md) — system prompts and rationale (prompt engineering)
 - 🚀 [`docs/AMELIORATIONS.md`](./docs/AMELIORATIONS.md) - improvement roadmap and critical review
 ### Quick Start
  
