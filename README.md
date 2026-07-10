@@ -71,6 +71,7 @@ La documentation détaillée est répartie ainsi :
  
 ```bash
 cd backend
+uv sync
 uv run start_db   # conteneur PostgreSQL
 uv run api        # API FastAPI
 ```
